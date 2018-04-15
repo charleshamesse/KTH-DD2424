@@ -1,0 +1,57 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Evaluation of Spectral Normalization for GAN using Inception Score}
+\author{
+	Eysteinn \textsc{Gunnlaugsson},
+	Egill \textsc{Vignisson},
+	Charles \textsc{Hamesse}
+}
+
+\begin{document}
+\maketitle
+
+%%%
+%%%
+%%%
+\abstract{
+In this project, we will implement a number of different Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} for image generation.}
+ 
+ 
+%%%
+%%%
+%%%
+\section{Models} 
+We plan to at least implement DCGAN \cite{DBLP:journals/corr/RadfordMC15} with the new Spectral Normalization \cite{miyato2018spectral}. On top of that and if time allows, we will also implement different losses such as LSGAN \cite{mao2017least} or WGAN \cite{arjovsky2017wasserstein}, and various training improvement techniques such as mini-batch discrimination \cite{salimans2016improved}. 
+
+%%%
+%%%
+%%%
+\section{Evaluation} 
+For evaluating the performance of these GANs, we will implement the inception score metric as described in \cite{salimans2016improved}. We already have made up a dataset of 30K animal pictures (mostly reptiles), fetched from the Flickr API. If that turns out to be too few or not suitable for any reason we will fall back to using CIFAR-100 or ImageNet (or a subset of these).  
+
+%%%
+%%%
+%%%
+\section{Summary}
+Here's an agile summary of our plan: 
+\begin{itemize}
+	\item implement DCGAN with original loss (priority 1)
+	\item implement spectral normalization (priority 1)
+	\item implement inception score metric (priority 1)
+	\item evaluate all our GANs on our reptile dataset (priority 1)
+	\item implement other losses (LSGAN, WGAN) (priority 2)
+	\item evaluate all our GANs on CIFAR-100 (priority 2)
+	\item implement mini-batch discrimination and other improvements(priority 3)
+\end{itemize}
+\bibliographystyle{alpha}
+\bibliography{bib}
+\end{document}
