@@ -1,0 +1,95 @@
+\documentclass[runningheads]{llncs}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{ruler}
+\usepackage{color}
+\usepackage[width=122mm,left=12mm,paperwidth=146mm,height=193mm,top=12mm,paperheight=217mm]{geometry}
+\begin{document}
+\pagestyle{headings}
+\mainmatter
+
+%
+\def\ECCV16SubNumber{16}
+\def\GroupNumber{16}
+\title{Evaluation of Spectral Normalization for GANs Using Inception Score}
+\titlerunning{Evaluation of Spectral Normalization for GAN using Inception Score}\authorrunning{Authors}
+\author{Eysteinn \textsc{Gunnlaugsson},
+	Egill \textsc{Vignisson},
+	Charles \textsc{Hamesse}}
+\institute{Group \GroupNumber}
+\maketitle
+
+%
+\begin{abstract}
+The abstract should summarize the contents of the paper. LNCS guidelines
+indicate it should be at least 70 and at most 150 words. It should be set in 9-point
+font size and should be inset 1.0~cm from the right and left margins. \dots
+\keywords{Generative adversarial networks, generative models, image generation}
+\end{abstract}
+
+%
+\input{Introduction}
+\input{Background}
+\input{Approach}
+\input{Experiments}
+\input{Conclusions}
+
+%
+\bibliographystyle{splncs}
+\bibliography{egbib}
+
+%
+~\\
+\pagebreak
+\appendix
+\section{Template examples}
+
+% Example table
+\setlength{\tabcolsep}{4pt}
+\begin{table}
+\begin{center}
+\caption{Font sizes of headings. Table captions should always be
+positioned {\it above} the tables. The final sentence of a table
+caption should end without a full stop}
+\label{table:headings}
+\begin{tabular}{lll}
+\hline\noalign{\smallskip}
+Heading level & Example & Font size and style\\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+Title (centered)  & {\Large \bf Lecture Notes \dots} & 14 point, bold\\
+1st-level heading & {\large \bf 1 Introduction} & 12 point, bold\\
+2nd-level heading & {\bf 2.1 Printing Area} & 10 point, bold\\
+3rd-level heading & {\bf Headings.} Text follows \dots & 10 point, bold
+\\
+4th-level heading & {\it Remark.} Text follows \dots & 10 point,
+italic\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+\setlength{\tabcolsep}{1.4pt}
+
+% Example figure
+(Fig.~\ref{fig:example} shows an example).
+\begin{figure}
+\centering
+\includegraphics[height=6.5cm]{figures/eijkel2}
+\caption{wuzup}
+\label{fig:example}
+\end{figure}
+
+% If possible (e.g. if you use \LaTeX) please define figures as floating objects. \LaTeX\ users, please avoid using the location parameter ``h'' for ``here''. If you have to insert a pagebreak before a figure, please ensure that the previous page is completely filled.
+
+% Example math
+\begin{align}
+  \psi (u) & = \int_{0}^{T} \left[\frac{1}{2}
+  \left(\Lambda_{0}^{-1} u,u\right) + N^{\ast} (-u)\right] dt \; \\
+& = 0 ?
+\end{align}Please punctuate a displayed equation in the same way as ordinary
+text but with a small space before the end punctuation.
+
+
+
+\end{document}

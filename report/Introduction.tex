@@ -1,0 +1,10 @@
+\section{Introduction}
+Motivate the problem you are trying to solve, attempt to make an intuitive description of the problem and also formally define the problem. (1-2 pages including title, authors and abstract)
+
+
+In this project, we will implement a number of different Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} for image generation.
+ 
+ 
+We plan to at least implement DCGAN \cite{DBLP:journals/corr/RadfordMC15} with the new Spectral Normalization \cite{miyato2018spectral}. On top of that and if time allows, we will also implement different losses such as LSGAN \cite{mao2017least} or WGAN \cite{arjovsky2017wasserstein}, and various training improvement techniques such as mini-batch discrimination \cite{salimans2016improved}. 
+
+For evaluating the performance of these GANs, we will implement the inception score metric as described in \cite{salimans2016improved}. We already have made up a dataset of 30K animal pictures (mostly reptiles), fetched from the Flickr API. If that turns out to be too few or not suitable for any reason we will fall back to using CIFAR-100 or ImageNet (or a subset of these).  
