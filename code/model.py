@@ -1,11 +1,12 @@
 import math
 from glob import glob
 import os
+import json
 import time
 import tensorflow as tf
 import numpy as np
 from ops import lrelu, conv2d, conv_cond_concat, linear, concat, deconv2d, batch_norm
-from utils import imread, sigmoid_cross_entropy_with_logits, get_image, save_images, image_manifold_size
+from utils import imread, sigmoid_cross_entropy_with_logits, get_image, save_images, image_manifold_size, NumpyEncoder
 from inception_score import get_inception_score
 
 class DCGAN(object):
@@ -18,6 +19,7 @@ class DCGAN(object):
         self.model_dir = 'models'
         self.data_dir = '../dataset/' #"datadir/"  # TODO fix
         self.sample_dir = "../dataset/generated/" # TODO fix
+        self.results_dir = 'results'
         self.batch_size = 4
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
@@ -25,7 +27,12 @@ class DCGAN(object):
         self.sample_num = 1000
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
-        self.epochs = 2
+        self.epochs = 5
+        self.results = {
+            "d_loss": [],
+            "g_loss": [],
+            "is": []
+        }
 
         self.d_bn1 = batch_norm(name='d_bn1')
         self.d_bn2 = batch_norm(name='d_bn2')
@@ -145,6 +152,8 @@ class DCGAN(object):
             self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))[0:8]
             batch_idxs = len(self.data) // self.batch_size
 
+            epoch_d_loss = 0
+            epoch_g_loss = 0
             for idx in range(0, batch_idxs):
                 batch_files = self.data[idx * self.batch_size:(idx + 1) * self.batch_size]
                 batch = [get_image(batch_file,
@@ -169,16 +178,25 @@ class DCGAN(object):
                 errD_fake = self.d_loss_fake.eval({self.z: batch_z})
                 errD_real = self.d_loss_real.eval({self.inputs: batch_images})
                 errG = self.g_loss.eval({self.z: batch_z})
+                
+                batch_d_loss = errD_fake + errD_real
+                batch_g_loss = errG
+
+                epoch_d_loss += batch_d_loss
+                epoch_g_loss += batch_g_loss
 
                 counter += 1
                 print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f"\
                       % (epoch, self.epochs, idx, batch_idxs,
-                         time.time() - start_time, errD_fake + errD_real, errG))
+                         time.time() - start_time, batch_d_loss, errG))
 
                 if np.mod(counter, 500) == 2:
                     self.save(self.checkpoint_dir, counter)
+            
+            epoch_d_loss /= self.batch_size
+            epoch_g_loss /= self.batch_size
 
-            #if np.mod(counter, 1) == 1:
+            # Sample and evaluate inception score
             try:
                 print("Sampling")
                 sample_op = self.sampler(self.z)
@@ -193,13 +211,24 @@ class DCGAN(object):
                 print("Computing inception score")
                 generated_images_list = [(image+1)*255/2 for image in generated_images]
                 score = get_inception_score(generated_images_list, self.sess, splits=4)
-                print("Inception score", score)
+                print(score)
                 
                 # Save images to png
                 save_images(generated_images, image_manifold_size(generated_images.shape[0]), './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
 
             except Exception as e:
                 print("Sampling error:", e)
+
+            # Save results
+            try:
+                self.results['d_loss'].append(epoch_d_loss)
+                self.results['g_loss'].append(epoch_g_loss)
+                self.results['is'].append(score)
+
+                with open(os.path.join(self.results_dir, 'output'), 'w') as of:
+                    json.dump(self.results, of, cls=NumpyEncoder)
+            except Exception as e:
+                print("Result saving error:", e)
                 
     
     def sampler(self, z, y=None):

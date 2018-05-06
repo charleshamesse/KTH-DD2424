@@ -4,6 +4,7 @@ Some codes from https://github.com/Newmu/dcgan_code
 import math
 import random
 import pprint
+import json
 import scipy.misc
 import numpy as np
 from time import gmtime, strftime
@@ -16,6 +17,21 @@ pp = pprint.PrettyPrinter()
 
 get_stddev = lambda x, k_h, k_w: 1 / math.sqrt(k_w * k_h * x.get_shape()[-1])
 
+class NumpyEncoder(json.JSONEncoder):
+    # Special json encoder for numpy types
+    # cf https://stackoverflow.com/questions/26646362/numpy-array-is-not-json-serializable
+
+    def default(self, obj): # pylint: disable=E0202
+        if isinstance(obj, (np.int_, np.intc, np.intp, np.int8,
+                            np.int16, np.int32, np.int64, np.uint8,
+                            np.uint16, np.uint32, np.uint64)):
+            return int(obj)
+        elif isinstance(obj, (np.float_, np.float16, np.float32,
+                              np.float64)):
+            return float(obj)
+        elif isinstance(obj, (np.ndarray,)):  # This is the fix
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 def show_all_variables():
     model_vars = tf.trainable_variables()
