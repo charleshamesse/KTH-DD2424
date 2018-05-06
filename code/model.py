@@ -6,23 +6,23 @@ import tensorflow as tf
 import numpy as np
 from ops import lrelu, conv2d, conv_cond_concat, linear, concat, deconv2d, batch_norm
 from utils import imread, sigmoid_cross_entropy_with_logits, get_image, save_images, image_manifold_size
-
+from inception_score import get_inception_score
 
 class DCGAN(object):
     def __init__(self, sess):
         """MODEL PARAMS. INIT FROM INPUT LATER"""
         self.image_shape = 108, 108
         self.z_dim = 100
-        self.dataset_name = "reptiles"
+        self.dataset_name = "photos_108"
         self.checkpoint_dir = "checkpoints"
         self.model_dir = 'models'
-        self.data_dir = "datadir/"  # TODO fix
-        self.sample_dir = "generated/" # TODO fix
-        self.batch_size = 16
+        self.data_dir = '../dataset/' #"datadir/"  # TODO fix
+        self.sample_dir = "../dataset/generated/" # TODO fix
+        self.batch_size = 4
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
         self.sess = sess
-        self.sample_num = 4
+        self.sample_num = 1000
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
         self.epochs = 2
@@ -132,15 +132,6 @@ class DCGAN(object):
 
         sample_z = np.random.uniform(-1, 1, size=(self.sample_num, self.z_dim))
 
-        # sample_files = self.data[0:self.sample_num]
-        # sample = [get_image(sample_file,
-        #           input_height=self.image_shape[0],
-        #           input_width=self.image_shape[1],
-        #           resize_height=self.image_shape[0],
-        #           resize_width=self.image_shape[1]) for sample_file in sample_files]
-
-        # sample_inputs = np.array(sample).astype(np.float32)
-
         counter = 1
         start_time = time.time()
         could_load, checkpoint_counter = self.load(self.checkpoint_dir)
@@ -151,7 +142,7 @@ class DCGAN(object):
             print(" [!] Load failed...")
 
         for epoch in range(self.epochs):
-            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))
+            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))[0:8]
             batch_idxs = len(self.data) // self.batch_size
 
             for idx in range(0, batch_idxs):
@@ -184,28 +175,32 @@ class DCGAN(object):
                       % (epoch, self.epochs, idx, batch_idxs,
                          time.time() - start_time, errD_fake + errD_real, errG))
 
+                if np.mod(counter, 500) == 2:
+                    self.save(self.checkpoint_dir, counter)
+
             #if np.mod(counter, 1) == 1:
             try:
                 print("Sampling")
-                sample = self.sampler(self.z)
-                samples = self.sess.run(sample,
+                sample_op = self.sampler(self.z)
+                generated_images = self.sess.run(
+                    sample_op,
                     feed_dict={
                         self.z: sample_z,
                     },
                 )
-                #samples_ = np.array(samples)
-                print("here")#, samples_.shape)
-                print(image_manifold_size(samples.shape[0]))
-                print("there")
-                save_images(samples, image_manifold_size(samples.shape[0]),
-                            './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
-                print("[Sample]")# d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
-            except Exception as e:
-                print(e)
-                print("one pic error!...")
 
-                if np.mod(counter, 500) == 2:
-                    self.save(self.checkpoint_dir, counter)
+                # Compute inception score
+                print("Computing inception score")
+                generated_images_list = [(image+1)*255/2 for image in generated_images]
+                score = get_inception_score(generated_images_list, self.sess, splits=4)
+                print("Inception score", score)
+                
+                # Save images to png
+                save_images(generated_images, image_manifold_size(generated_images.shape[0]), './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
+
+            except Exception as e:
+                print("Sampling error:", e)
+                
     
     def sampler(self, z, y=None):
         # TODO refactor with generator
