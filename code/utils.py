@@ -31,8 +31,10 @@ def get_image(image_path, input_height, input_width,
 
 
 def save_images(images, size, image_path):
-    return imsave(inverse_transform(images), size, image_path)
-
+    try:
+        return imsave(inverse_transform(images), size, image_path)
+    except Exception as e:
+        print("save_images exception", e)
 
 def imread(path, grayscale=False):
     if (grayscale):

@@ -16,13 +16,13 @@ class DCGAN(object):
         self.dataset_name = "reptiles"
         self.checkpoint_dir = "checkpoints"
         self.model_dir = 'models'
-        self.data_dir = "../../datadir"  # TODO fix
-        self.sample_dir = "../../sampledir" # TODO fix
-        self.batch_size = 64
+        self.data_dir = "datadir/"  # TODO fix
+        self.sample_dir = "generated/" # TODO fix
+        self.batch_size = 16
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
         self.sess = sess
-        self.sample_num = 64
+        self.sample_num = 4
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
         self.epochs = 2
@@ -184,18 +184,25 @@ class DCGAN(object):
                       % (epoch, self.epochs, idx, batch_idxs,
                          time.time() - start_time, errD_fake + errD_real, errG))
 
-                if np.mod(counter, 1) == 1:
-                    try:
-                        samples = self.sess.run([self.sampler],
-                            feed_dict={
-                                self.z: sample_z,
-                            },
-                        )
-                        save_images(samples, image_manifold_size(samples.shape[0]),
-                                    './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
-                        print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
-                    except:
-                        print("one pic error!...")
+            #if np.mod(counter, 1) == 1:
+            try:
+                print("Sampling")
+                sample = self.sampler(self.z)
+                samples = self.sess.run(sample,
+                    feed_dict={
+                        self.z: sample_z,
+                    },
+                )
+                #samples_ = np.array(samples)
+                print("here")#, samples_.shape)
+                print(image_manifold_size(samples.shape[0]))
+                print("there")
+                save_images(samples, image_manifold_size(samples.shape[0]),
+                            './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
+                print("[Sample]")# d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
+            except Exception as e:
+                print(e)
+                print("one pic error!...")
 
                 if np.mod(counter, 500) == 2:
                     self.save(self.checkpoint_dir, counter)
@@ -204,11 +211,11 @@ class DCGAN(object):
         # TODO refactor with generator
         with tf.variable_scope("generator") as scope:
             scope.reuse_variables()
-            s_h, s_w = self.output_height, self.output_width
-            s_h2, s_w2 = conv_out_size_same(s_h, 2), conv_out_size_same(s_w, 2)
-            s_h4, s_w4 = conv_out_size_same(s_h2, 2), conv_out_size_same(s_w2, 2)
-            s_h8, s_w8 = conv_out_size_same(s_h4, 2), conv_out_size_same(s_w4, 2)
-            s_h16, s_w16 = conv_out_size_same(s_h8, 2), conv_out_size_same(s_w8, 2)
+            s_h, s_w = self.image_shape
+            s_h2, s_w2 = self.conv_out_size_same(s_h, 2), self.conv_out_size_same(s_w, 2)
+            s_h4, s_w4 = self.conv_out_size_same(s_h2, 2), self.conv_out_size_same(s_w2, 2)
+            s_h8, s_w8 = self.conv_out_size_same(s_h4, 2), self.conv_out_size_same(s_w4, 2)
+            s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
 
             # project `z` and reshape
             h0 = tf.reshape(
@@ -216,16 +223,16 @@ class DCGAN(object):
                 [-1, s_h16, s_w16, self.gf_dim * 8])
             h0 = tf.nn.relu(self.g_bn0(h0, train=False))
 
-            h1 = deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim*4], name='g_h1')
+            h1 = deconv2d(h0, [self.sample_num, s_h8, s_w8, self.gf_dim*4], name='g_h1')
             h1 = tf.nn.relu(self.g_bn1(h1, train=False))
 
-            h2 = deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim*2], name='g_h2')
+            h2 = deconv2d(h1, [self.sample_num, s_h4, s_w4, self.gf_dim*2], name='g_h2')
             h2 = tf.nn.relu(self.g_bn2(h2, train=False))
 
-            h3 = deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim*1], name='g_h3')
+            h3 = deconv2d(h2, [self.sample_num, s_h2, s_w2, self.gf_dim*1], name='g_h3')
             h3 = tf.nn.relu(self.g_bn3(h3, train=False))
 
-            h4 = deconv2d(h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4')
+            h4 = deconv2d(h3, [self.sample_num, s_h, s_w, self.c_dim], name='g_h4')
 
             return tf.nn.tanh(h4)
         
