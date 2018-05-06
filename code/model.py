@@ -17,6 +17,7 @@ class DCGAN(object):
         self.checkpoint_dir = "checkpoints"
         self.model_dir = 'models'
         self.data_dir = "../../datadir"  # TODO fix
+        self.sample_dir = "../../sampledir" # TODO fix
         self.batch_size = 64
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
@@ -91,13 +92,14 @@ class DCGAN(object):
 
     def generator(self, z):
         with tf.variable_scope("generator") as scope:
+            # Convolution parameter sizes
             s_h, s_w = self.image_shape
             s_h2, s_w2 = self.conv_out_size_same(s_h, 2), self.conv_out_size_same(s_w, 2)
             s_h4, s_w4 = self.conv_out_size_same(s_h2, 2), self.conv_out_size_same(s_w2, 2)
             s_h8, s_w8 = self.conv_out_size_same(s_h4, 2), self.conv_out_size_same(s_w4, 2)
             s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
 
-            # project `z` and reshape
+            # Project `z` and reshape
             self.z_, self.h0_w, self.h0_b = linear(z, self.gf_dim * 8 * s_h16 * s_w16, 'g_h0_lin', with_w=True)
 
             self.h0 = tf.reshape(self.z_, [-1, s_h16, s_w16, self.gf_dim * 8])
@@ -128,7 +130,7 @@ class DCGAN(object):
         except:
             tf.initialize_all_variables().run()
 
-        # sample_z = np.random.uniform(-1, 1, size=(self.sample_num, self.z_dim))
+        sample_z = np.random.uniform(-1, 1, size=(self.sample_num, self.z_dim))
 
         # sample_files = self.data[0:self.sample_num]
         # sample = [get_image(sample_file,
@@ -182,24 +184,51 @@ class DCGAN(object):
                       % (epoch, self.epochs, idx, batch_idxs,
                          time.time() - start_time, errD_fake + errD_real, errG))
 
-                # if np.mod(counter, 100) == 1:
-                #     try:
-                #         samples, d_loss, g_loss = self.sess.run(
-                #             [self.sampler, self.d_loss, self.g_loss],
-                #             feed_dict={
-                #                 self.z: sample_z,
-                #                 self.inputs: sample_inputs,
-                #             },
-                #         )
-                #         save_images(samples, image_manifold_size(samples.shape[0]),
-                #                     './{}/train_{:02d}_{:04d}.png'.format(config.sample_dir, epoch, idx))
-                #         print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
-                #     except:
-                #         print("one pic error!...")
+                if np.mod(counter, 1) == 1:
+                    try:
+                        samples = self.sess.run([self.sampler],
+                            feed_dict={
+                                self.z: sample_z,
+                            },
+                        )
+                        save_images(samples, image_manifold_size(samples.shape[0]),
+                                    './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
+                        print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
+                    except:
+                        print("one pic error!...")
 
                 if np.mod(counter, 500) == 2:
                     self.save(self.checkpoint_dir, counter)
+    
+    def sampler(self, z, y=None):
+        # TODO refactor with generator
+        with tf.variable_scope("generator") as scope:
+            scope.reuse_variables()
+            s_h, s_w = self.output_height, self.output_width
+            s_h2, s_w2 = conv_out_size_same(s_h, 2), conv_out_size_same(s_w, 2)
+            s_h4, s_w4 = conv_out_size_same(s_h2, 2), conv_out_size_same(s_w2, 2)
+            s_h8, s_w8 = conv_out_size_same(s_h4, 2), conv_out_size_same(s_w4, 2)
+            s_h16, s_w16 = conv_out_size_same(s_h8, 2), conv_out_size_same(s_w8, 2)
 
+            # project `z` and reshape
+            h0 = tf.reshape(
+                linear(z, self.gf_dim*8*s_h16*s_w16, 'g_h0_lin'),
+                [-1, s_h16, s_w16, self.gf_dim * 8])
+            h0 = tf.nn.relu(self.g_bn0(h0, train=False))
+
+            h1 = deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim*4], name='g_h1')
+            h1 = tf.nn.relu(self.g_bn1(h1, train=False))
+
+            h2 = deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim*2], name='g_h2')
+            h2 = tf.nn.relu(self.g_bn2(h2, train=False))
+
+            h3 = deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim*1], name='g_h3')
+            h3 = tf.nn.relu(self.g_bn3(h3, train=False))
+
+            h4 = deconv2d(h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4')
+
+            return tf.nn.tanh(h4)
+        
     def save(self, checkpoint_dir, step):
         # TODO make sure we dont overwrite existing models.
         model_name = "DCGAN.model"
