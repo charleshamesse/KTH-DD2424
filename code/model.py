@@ -206,17 +206,23 @@ class DCGAN(object):
             print(score)
 
             # Save results
-            try:
-                self.results['d_loss'].append(epoch_d_loss)
-                self.results['g_loss'].append(epoch_g_loss)
-                self.results['is'].append(score)
+            self.save_results(epoch_d_loss, epoch_g_loss, score)
 
-                with open(os.path.join(self.results_dir, 'output'), 'w') as of:
-                    json.dump(self.results, of, cls=NumpyEncoder)
-            except Exception as e:
-                print("Result saving error:", e)
+    def save_results(self, epoch_d_loss, epoch_g_loss, score):
+        # Appends to results dict and rewrites it
+        try:
+            self.results['d_loss'].append(epoch_d_loss)
+            self.results['g_loss'].append(epoch_g_loss)
+            self.results['is'].append(score)
+
+            with open(os.path.join(self.results_dir, 'output'), 'w') as of:
+                json.dump(self.results, of, cls=NumpyEncoder)
+
+        except Exception as e:
+            print("Result saving error:", e)
     
     def compute_inception_score(self, epoch, idx):
+        # Generates images and their inception score
         try:
             # Generate images and save them
             sample_op = self.sampler(self.z)
