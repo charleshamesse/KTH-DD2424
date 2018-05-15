@@ -4,6 +4,7 @@ import os
 import json
 import time
 import tensorflow as tf
+from keras.datasets import cifar10
 import numpy as np
 import config
 from ops import lrelu, conv2d, conv_cond_concat, linear, concat, deconv2d, batch_norm
@@ -13,22 +14,39 @@ from inception_score import get_inception_score
 class DCGAN(object):
     def __init__(self, sess):
         """MODEL PARAMS. INIT FROM INPUT LATER"""
-        self.image_shape = 108, 108
-        self.z_dim = 100
-        self.dataset_name = config.DATA['dataset_name']
         self.data_dir = config.DATA['data_dir']
+        self.dataset_name = config.DATA['dataset_name']
+
+        if self.dataset_name == 'cifar10':
+            self.image_shape = 32, 32
+            (x_train, _), (_, _) = cifar10.load_data()
+            self.data = x_train
+            self.c_dim = 3
+            self.grayscale = 0
+        else:  # reptile set
+            self.image_shape = 108, 108
+            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))
+            imread_img = imread(self.data[0])
+            if len(imread_img.shape) >= 3:  # check if image is a non-grayscale image by checking channel number
+                self.c_dim = imread(self.data[0]).shape[-1]
+            else:
+                self.c_dim = 1
+            self.grayscale = (self.c_dim == 1)
+
+        self.batch_size = config.MODEL['batch_size']
+        self.batch_idxs = len(self.data) // self.batch_size
         self.sample_dir = config.DATA['sample_dir']
         self.results_dir = config.DATA['results_dir']
         self.checkpoint_dir = config.MODEL['checkpoint_dir']
         self.model_dir = config.MODEL['model_dir']
-        self.batch_size = 4
+        self.z_dim = 100
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
         self.sess = sess
-        self.sample_num = 1000
+        self.sample_num = 1024
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
-        self.epochs = 5
+        self.epochs = config.MODEL['epochs']
         self.results = {
             "d_loss": [],
             "g_loss": [],
@@ -43,14 +61,6 @@ class DCGAN(object):
         self.g_bn3 = batch_norm(name='g_bn3')  # TODO maybe remove this line
 
         self.use_spectral_norm = True
-
-        self.data = glob(os.path.join(self.data_dir, self.dataset_name, '*.jpg'))
-        imread_img = imread(self.data[0])
-        if len(imread_img.shape) >= 3:  # check if image is a non-grayscale image by checking channel number
-            self.c_dim = imread(self.data[0]).shape[-1]
-        else:
-            self.c_dim = 1
-        self.grayscale = (self.c_dim == 1)
         self.build_model()
 
     @staticmethod
@@ -90,7 +100,7 @@ class DCGAN(object):
             # Convolution blocks
             # If we use spectral norm, we don't use batch norm
             if self.use_spectral_norm: 
-                h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
+                h0 = lrelu(conv2d(image, self.df_dim,  name='d_h0_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
                 h1 = lrelu(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
                 h2 = lrelu(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
                 h3 = lrelu(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
@@ -146,18 +156,17 @@ class DCGAN(object):
             print(" [!] Load failed...")
 
         for epoch in range(self.epochs):
-            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))[0:8]
-            batch_idxs = len(self.data) // self.batch_size
-
             epoch_d_loss = 0
             epoch_g_loss = 0
-            for idx in range(0, batch_idxs):
-                batch_files = self.data[idx * self.batch_size:(idx + 1) * self.batch_size]
-                batch = [get_image(batch_file,
-                         input_height=self.image_shape[0],
-                         input_width=self.image_shape[1],
-                         resize_height=self.image_shape[0],
-                         resize_width=self.image_shape[1]) for batch_file in batch_files]
+            for idx in range(0, self.batch_idxs):
+                batch = self.data[idx * self.batch_size:(idx + 1) * self.batch_size]
+
+                if self.dataset_name == 'reptiles':
+                    batch = [get_image(batch_file,
+                             input_height=self.image_shape[0],
+                             input_width=self.image_shape[1],
+                             resize_height=self.image_shape[0],
+                             resize_width=self.image_shape[1]) for batch_file in batch]
 
                 batch_images = np.array(batch).astype(np.float32)
 
@@ -184,7 +193,7 @@ class DCGAN(object):
 
                 counter += 1
                 print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f"\
-                      % (epoch, self.epochs, idx, batch_idxs,
+                      % (epoch, self.epochs, idx, self.batch_idxs,
                          time.time() - start_time, batch_d_loss, errG))
 
                 if np.mod(counter, 500) == 2:
@@ -239,9 +248,7 @@ class DCGAN(object):
             s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
 
             # project `z` and reshape
-            h0 = tf.reshape(
-                linear(z, self.gf_dim*8*s_h16*s_w16, 'g_h0_lin'),
-                [-1, s_h16, s_w16, self.gf_dim * 8])
+            h0 = tf.reshape(linear(z, self.gf_dim*8*s_h16*s_w16, 'g_h0_lin'), [-1, s_h16, s_w16, self.gf_dim * 8])
             h0 = tf.nn.relu(self.g_bn0(h0, train=False))
 
             h1 = deconv2d(h0, [self.sample_num, s_h8, s_w8, self.gf_dim*4], name='g_h1')
