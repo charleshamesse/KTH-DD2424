@@ -34,7 +34,6 @@ class DCGAN(object):
             "g_loss": [],
             "is": []
         }
-
         self.d_bn1 = batch_norm(name='d_bn1')
         self.d_bn2 = batch_norm(name='d_bn2')
         self.d_bn3 = batch_norm(name='d_bn3')  # TODO maybe remove this line
@@ -42,6 +41,8 @@ class DCGAN(object):
         self.g_bn1 = batch_norm(name='g_bn1')
         self.g_bn2 = batch_norm(name='g_bn2')
         self.g_bn3 = batch_norm(name='g_bn3')  # TODO maybe remove this line
+
+        self.use_spectral_norm = True
 
         self.data = glob(os.path.join(self.data_dir, self.dataset_name, '*.jpg'))
         imread_img = imread(self.data[0])
@@ -57,16 +58,15 @@ class DCGAN(object):
         return int(math.ceil(float(size) / float(stride)))
 
     def build_model(self):
-        image_dims = [self.image_shape[0], self.image_shape[1], self.c_dim]
-
         # Placeholders
+        image_dims = [self.image_shape[0], self.image_shape[1], self.c_dim]
         self.inputs = tf.placeholder(tf.float32, [self.batch_size] + image_dims, name='real_images')
         self.z = tf.placeholder(tf.float32, [None, self.z_dim], name='z')
 
         # Evaluate networks
         self.G = self.generator(self.z)
-        self.D_real, self.D_real_logits = self.discriminator(self.inputs, reuse=False)
-        self.D_fake, self.D_fake_logits = self.discriminator(self.G, reuse=True)
+        self.D_real, self.D_real_logits = self.discriminator(self.inputs, reuse=False, update_collection='NO_OPS')
+        self.D_fake, self.D_fake_logits = self.discriminator(self.G, reuse=True, update_collection=None)
         
         # Losses
         self.D_real_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_real_logits, tf.ones_like(self.D_real)))
@@ -74,23 +74,33 @@ class DCGAN(object):
         self.D_loss = self.D_real_loss + self.D_fake_loss
         self.G_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.ones_like(self.D_fake)))
         
+        # Variables
         t_vars = tf.trainable_variables()
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
 
+        # Saver
         self.saver = tf.train.Saver()
 
-    def discriminator(self, image, reuse=False):
+    def discriminator(self, image, reuse=False, update_collection=tf.GraphKeys.UPDATE_OPS):
         with tf.variable_scope("discriminator") as scope:
             if reuse:
                 scope.reuse_variables()
             
             # Convolution blocks
-            h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))
-            h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim * 2, name='d_h1_conv')))
-            h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim * 4, name='d_h2_conv')))
-            h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim * 8, name='d_h3_conv')))
-            h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin')
+            # If we use spectral norm, we don't use batch norm
+            if self.use_spectral_norm: 
+                h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
+                h1 = lrelu(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
+                h2 = lrelu(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
+                h3 = lrelu(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
+                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin', spectral_normed=self.use_spectral_norm, update_collection=update_collection)
+            else:
+                h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
+                h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection)))
+                h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection)))
+                h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection)))
+                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin', spectral_normed=self.use_spectral_norm, update_collection=update_collection)
 
             return tf.nn.sigmoid(h4), h4
 
