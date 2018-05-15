@@ -59,19 +59,21 @@ class DCGAN(object):
     def build_model(self):
         image_dims = [self.image_shape[0], self.image_shape[1], self.c_dim]
 
+        # Placeholders
         self.inputs = tf.placeholder(tf.float32, [self.batch_size] + image_dims, name='real_images')
-        inputs = self.inputs
         self.z = tf.placeholder(tf.float32, [None, self.z_dim], name='z')
 
+        # Evaluate networks
         self.G = self.generator(self.z)
-        self.D, self.D_logits = self.discriminator(inputs, reuse=False)
-        # self.sampler = self.sampler(self.z, self.y)
-        self.D_, self.D_logits_ = self.discriminator(self.G, reuse=True)
-        self.d_loss_real = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_logits, tf.ones_like(self.D)))
-        self.d_loss_fake = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_logits_, tf.zeros_like(self.D_)))
-        self.g_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_logits_, tf.ones_like(self.D_)))
-        self.d_loss = self.d_loss_real + self.d_loss_fake
-
+        self.D_real, self.D_real_logits = self.discriminator(self.inputs, reuse=False)
+        self.D_fake, self.D_fake_logits = self.discriminator(self.G, reuse=True)
+        
+        # Losses
+        self.D_real_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_real_logits, tf.ones_like(self.D_real)))
+        self.D_fake_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.zeros_like(self.D_fake)))
+        self.D_loss = self.D_real_loss + self.D_fake_loss
+        self.G_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.ones_like(self.D_fake)))
+        
         t_vars = tf.trainable_variables()
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
@@ -82,7 +84,8 @@ class DCGAN(object):
         with tf.variable_scope("discriminator") as scope:
             if reuse:
                 scope.reuse_variables()
-
+            
+            # Convolution blocks
             h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))
             h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim * 2, name='d_h1_conv')))
             h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim * 4, name='d_h2_conv')))
@@ -101,31 +104,21 @@ class DCGAN(object):
             s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
 
             # Project z and reshape
-            self.z_, self.h0_w, self.h0_b = linear(z, self.gf_dim * 8 * s_h16 * s_w16, 'g_h0_lin', with_w=True)
+            self.z_ = linear(z, self.gf_dim * 8 * s_h16 * s_w16, 'g_h0_lin')
             self.h0 = tf.reshape(self.z_, [-1, s_h16, s_w16, self.gf_dim * 8])
             h0 = tf.nn.relu(self.g_bn0(self.h0))
             
-            # Deconv block 1
-            h1, self.h1_w, self.h1_b = deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim * 4], name='g_h1', with_w=True)
-            h1 = tf.nn.relu(self.g_bn1(h1))
-
-            # Deconv block 2
-            h2, self.h2_w, self.h2_b = deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim * 2], name='g_h2', with_w=True)
-            h2 = tf.nn.relu(self.g_bn2(h2))
-
-            # Deconv block 3
-            h3, self.h3_w, self.h3_b = deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3', with_w=True)
-            h3 = tf.nn.relu(self.g_bn3(h3))
-
-            # Deconv block 4
-            h4, self.h4_w, self.h4_b = deconv2d(h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4', with_w=True)
-            h4 = tf.nn.tanh(h4)
+            # Deconvolution blocks (deconv, batch norm, relu)
+            h1 = tf.nn.relu(self.g_bn1(deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim * 4], name='g_h1')))
+            h2 = tf.nn.relu(self.g_bn2(deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim * 2], name='g_h2')))
+            h3 = tf.nn.relu(self.g_bn3(deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3')))
+            h4 = tf.nn.tanh(deconv2d(h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4'))
 
             return h4
 
     def train(self):
-        d_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.d_loss, var_list=self.d_vars)
-        g_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.g_loss, var_list=self.g_vars)
+        d_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.D_loss, var_list=self.d_vars)
+        g_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.G_loss, var_list=self.g_vars)
         try:
             tf.global_variables_initializer().run()
         except:
@@ -169,9 +162,9 @@ class DCGAN(object):
                 # TODO Run g_optim twice to make sure that d_loss does not go to zero (different from paper)
                 self.sess.run([g_optim], feed_dict={self.z: batch_z})
 
-                errD_fake = self.d_loss_fake.eval({self.z: batch_z})
-                errD_real = self.d_loss_real.eval({self.inputs: batch_images})
-                errG = self.g_loss.eval({self.z: batch_z})
+                errD_fake = self.D_fake_loss.eval({self.z: batch_z})
+                errD_real = self.D_real_loss.eval({self.inputs: batch_images})
+                errG = self.G_loss.eval({self.z: batch_z})
                 
                 batch_d_loss = errD_fake + errD_real
                 batch_g_loss = errG
