@@ -105,8 +105,14 @@ class DCGAN(object):
 
             return tf.nn.sigmoid(h4), h4
 
-    def generator(self, z):
+    def generator(self, z, train=True):
         with tf.variable_scope("generator") as scope:
+            # train is True when training, False when sampling
+            batch_size = self.batch_size
+            if not train: # When sampling
+                scope.reuse_variables()
+                batch_size = self.sample_num
+
             # Convolution parameter sizes
             s_h, s_w = self.image_shape
             s_h2, s_w2 = self.conv_out_size_same(s_h, 2), self.conv_out_size_same(s_w, 2)
@@ -117,14 +123,14 @@ class DCGAN(object):
             # Project z, reshape and go  through 4 convolution blocks (deconv, batch norm, relu)
             self.z_ = linear(z, self.gf_dim * 8 * s_h16 * s_w16, 'g_h0_lin')
             self.h0 = tf.reshape(self.z_, [-1, s_h16, s_w16, self.gf_dim * 8])
-            h0 = tf.nn.relu(self.g_bn0(self.h0))
-            h1 = tf.nn.relu(self.g_bn1(deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim * 4], name='g_h1')))
-            h2 = tf.nn.relu(self.g_bn2(deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim * 2], name='g_h2')))
-            h3 = tf.nn.relu(self.g_bn3(deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3')))
-            h4 = tf.nn.tanh(deconv2d(h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4'))
+            h0 = tf.nn.relu(self.g_bn0(self.h0, train=train))
+            h1 = tf.nn.relu(self.g_bn1(deconv2d(h0, [batch_size, s_h8, s_w8, self.gf_dim * 4], name='g_h1'), train=train))
+            h2 = tf.nn.relu(self.g_bn2(deconv2d(h1, [batch_size, s_h4, s_w4, self.gf_dim * 2], name='g_h2'), train=train))
+            h3 = tf.nn.relu(self.g_bn3(deconv2d(h2, [batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3'), train=train))
+            h4 = tf.nn.tanh(deconv2d(h3, [batch_size, s_h, s_w, self.c_dim], name='g_h4'))
 
             return h4
-
+    
     def train(self):
         d_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.D_loss, var_list=self.d_vars)
         g_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.G_loss, var_list=self.g_vars)
@@ -225,7 +231,7 @@ class DCGAN(object):
         # Generates images and their inception score
         try:
             # Generate images and save them
-            sample_op = self.sampler(self.z)
+            sample_op = self.generator(self.z, train=False)
             generated_images = self.sess.run(
                 sample_op,
                 feed_dict={
@@ -244,35 +250,6 @@ class DCGAN(object):
         except Exception as e:
             print("Sampling error:", e)
             return np.nan
-                
-    def sampler(self, z, y=None):
-        # TODO refactor with generator
-        with tf.variable_scope("generator") as scope:
-            scope.reuse_variables()
-            s_h, s_w = self.image_shape
-            s_h2, s_w2 = self.conv_out_size_same(s_h, 2), self.conv_out_size_same(s_w, 2)
-            s_h4, s_w4 = self.conv_out_size_same(s_h2, 2), self.conv_out_size_same(s_w2, 2)
-            s_h8, s_w8 = self.conv_out_size_same(s_h4, 2), self.conv_out_size_same(s_w4, 2)
-            s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
-
-            # project `z` and reshape
-            h0 = tf.reshape(
-                linear(z, self.gf_dim*8*s_h16*s_w16, 'g_h0_lin'),
-                [-1, s_h16, s_w16, self.gf_dim * 8])
-            h0 = tf.nn.relu(self.g_bn0(h0, train=False))
-
-            h1 = deconv2d(h0, [self.sample_num, s_h8, s_w8, self.gf_dim*4], name='g_h1')
-            h1 = tf.nn.relu(self.g_bn1(h1, train=False))
-
-            h2 = deconv2d(h1, [self.sample_num, s_h4, s_w4, self.gf_dim*2], name='g_h2')
-            h2 = tf.nn.relu(self.g_bn2(h2, train=False))
-
-            h3 = deconv2d(h2, [self.sample_num, s_h2, s_w2, self.gf_dim*1], name='g_h3')
-            h3 = tf.nn.relu(self.g_bn3(h3, train=False))
-
-            h4 = deconv2d(h3, [self.sample_num, s_h, s_w, self.c_dim], name='g_h4')
-
-            return tf.nn.tanh(h4)
         
     def save(self, checkpoint_dir, step):
         # TODO make sure we dont overwrite existing models.
