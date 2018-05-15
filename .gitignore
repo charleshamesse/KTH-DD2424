@@ -6,6 +6,7 @@
 /dataset/photos_old/*
 /dataset/snakes_reptiles.npy
 /dataset/photos_108.zip
+/code/checkpoints/*
 /report/.texpadtmp/*
 /proposal/.texpadtmp/*
 /tests/*
