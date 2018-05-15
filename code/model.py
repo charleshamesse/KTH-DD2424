@@ -60,26 +60,19 @@ class DCGAN(object):
         image_dims = [self.image_shape[0], self.image_shape[1], self.c_dim]
 
         self.inputs = tf.placeholder(tf.float32, [self.batch_size] + image_dims, name='real_images')
-
         inputs = self.inputs
-
         self.z = tf.placeholder(tf.float32, [None, self.z_dim], name='z')
 
         self.G = self.generator(self.z)
         self.D, self.D_logits = self.discriminator(inputs, reuse=False)
         # self.sampler = self.sampler(self.z, self.y)
         self.D_, self.D_logits_ = self.discriminator(self.G, reuse=True)
-
         self.d_loss_real = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_logits, tf.ones_like(self.D)))
-
         self.d_loss_fake = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_logits_, tf.zeros_like(self.D_)))
-
         self.g_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_logits_, tf.ones_like(self.D_)))
-
         self.d_loss = self.d_loss_real + self.d_loss_fake
 
         t_vars = tf.trainable_variables()
-
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
 
@@ -107,28 +100,28 @@ class DCGAN(object):
             s_h8, s_w8 = self.conv_out_size_same(s_h4, 2), self.conv_out_size_same(s_w4, 2)
             s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
 
-            # Project `z` and reshape
+            # Project z and reshape
             self.z_, self.h0_w, self.h0_b = linear(z, self.gf_dim * 8 * s_h16 * s_w16, 'g_h0_lin', with_w=True)
-
             self.h0 = tf.reshape(self.z_, [-1, s_h16, s_w16, self.gf_dim * 8])
             h0 = tf.nn.relu(self.g_bn0(self.h0))
+            
+            # Deconv block 1
+            h1, self.h1_w, self.h1_b = deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim * 4], name='g_h1', with_w=True)
+            h1 = tf.nn.relu(self.g_bn1(h1))
 
-            self.h1, self.h1_w, self.h1_b = deconv2d(h0, [self.batch_size, s_h8, s_w8,
-                                                          self.gf_dim * 4], name='g_h1', with_w=True)
-            h1 = tf.nn.relu(self.g_bn1(self.h1))
-
-            h2, self.h2_w, self.h2_b = deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim * 2],
-                                                name='g_h2', with_w=True)
+            # Deconv block 2
+            h2, self.h2_w, self.h2_b = deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim * 2], name='g_h2', with_w=True)
             h2 = tf.nn.relu(self.g_bn2(h2))
 
-            h3, self.h3_w, self.h3_b = deconv2d(
-                h2, [self.batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3', with_w=True)
+            # Deconv block 3
+            h3, self.h3_w, self.h3_b = deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3', with_w=True)
             h3 = tf.nn.relu(self.g_bn3(h3))
 
-            h4, self.h4_w, self.h4_b = deconv2d(
-                h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4', with_w=True)
+            # Deconv block 4
+            h4, self.h4_w, self.h4_b = deconv2d(h3, [self.batch_size, s_h, s_w, self.c_dim], name='g_h4', with_w=True)
+            h4 = tf.nn.tanh(h4)
 
-            return tf.nn.tanh(h4)
+            return h4
 
     def train(self):
         d_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.d_loss, var_list=self.d_vars)
