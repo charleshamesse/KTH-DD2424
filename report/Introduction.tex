@@ -1,10 +1,27 @@
 \section{Introduction}
 Motivate the problem you are trying to solve, attempt to make an intuitive description of the problem and also formally define the problem. (1-2 pages including title, authors and abstract)
 
+%TODO
+%Motivate the problem
 
-In this project, we will implement a number of different Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} for image generation.
+%In this project, we will implement a number of different Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} for image generation.
  
- 
-We plan to at least implement DCGAN \cite{DBLP:journals/corr/RadfordMC15} with the new Spectral Normalization \cite{miyato2018spectral}. On top of that and if time allows, we will also implement different losses such as LSGAN \cite{mao2017least} or WGAN \cite{arjovsky2017wasserstein}, and various training improvement techniques such as mini-batch discrimination \cite{salimans2016improved}. 
+%We plan to at least implement DCGAN \cite{DBLP:journals/corr/RadfordMC15} with the new Spectral Normalization \cite{miyato2018spectral}. On top of that and if time allows, we will also implement different losses such as LSGAN \cite{mao2017least} or WGAN \cite{arjovsky2017wasserstein}, and various training improvement techniques such as mini-batch discrimination \cite{salimans2016improved}. 
 
-For evaluating the performance of these GANs, we will implement the inception score metric as described in \cite{salimans2016improved}. We already have made up a dataset of 30K animal pictures (mostly reptiles), fetched from the Flickr API. If that turns out to be too few or not suitable for any reason we will fall back to using CIFAR-100 or ImageNet (or a subset of these).  
+%For evaluating the performance of these GANs, we will implement the inception score metric as described in \cite{salimans2016improved}. We already have made up a dataset of 30K animal pictures (mostly reptiles), fetched from the Flickr API. If that turns out to be too few or not suitable for any reason we will fall back to using CIFAR-100 or ImageNet (or a subset of these).
+
+The purpose of this project is to investigate the performance of the different types of Generative Adversarial Networks (GANs) \cite{goodfellow2014generative}  for image generation as well as possible improvement options.
+The project was originally defined based on varying levels of priority where everything assigned priority 1 was promised to be completed.
+
+\begin{itemize}
+	\item Implement Deep Convolutional Generative Adversial Network with original loss \cite{DBLP:journals/corr/RadfordMC15} (priority 1)
+	\item Implement the inception score metric cite{salimans2016improved} (priority 1)
+	\item Implement Spectral Normalization (priority 1)
+	\item Evaluate all our GANs on our reptile dataset (priority 1)
+	\item Implement other losses (LSGAN, WGAN) \cite{mao2017least} (priority 2)
+	\item Evaluate GANs on CIFAR-100 (priority 2)
+	\item Implement mini-batch discrimination and or other improvements \cite{salimans2016improved}. (priority 3)
+\end{itemize}
+
+In order to evaluate the performance of these GANs, the evaluation metric known as the inception score, as described in \cite{salimans2016improved}, will be implemented. Furthermore a data set consisting of roughly 30K animal pictures (mostly reptiles), was fetched from the Flickr API while other well known options such as a subset of CIFAR-100 or ImageNet were thought of as possible replacements in the case of unsatisfactory results.
+

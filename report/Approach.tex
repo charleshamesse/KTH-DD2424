@@ -7,3 +7,15 @@ architecture. What training parameters and techniques you have used.
 The computational complexity of your model. And similar questions.
 To help explain your approach please make figures to accompany your
 text description. (1-3 pages)
+
+%Not sure these sections actually belong here do with them as you please
+\subsection{Data Collection}
+%not sure if this is actually something we want to include and if so where it should be introduced so feel free to change it
+Images were collected using \href{https://www.flickr.com/services/api/}{Flikr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon. In total the data set is made up of approximately 30k color images all re-sized to dimensions of 108x108x3 before training was conducted. 
+
+%do I want to include images from the data set?
+
+\subsection{Frame of Reference}
+In order to measure the performance of each implementation a frame of reference had to be established. As the golden standard, that every implementation would be compared to, the inception score of the actual data set was calculated resulting in a score of \textbf{1.5295098 $\pm$ 0.06244182}.
+%Could add the score for cifar or some other data set for comparison
+
