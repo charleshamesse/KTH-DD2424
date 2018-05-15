@@ -8,4 +8,5 @@ DATA = {
 MODEL = {
     'model_dir': 'models',
     'checkpoint_dir': 'checkpoints',
+    'batch_size': 64
 }

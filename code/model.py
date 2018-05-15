@@ -21,14 +21,15 @@ class DCGAN(object):
         self.results_dir = config.DATA['results_dir']
         self.checkpoint_dir = config.MODEL['checkpoint_dir']
         self.model_dir = config.MODEL['model_dir']
-        self.batch_size = 64 # 4
+        self.batch_size = config.MODEL['batch_size']
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
         self.sess = sess
-        self.sample_num = 1024 #1000
+        self.sample_num = 1024
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
-        self.epochs = 5
+        self.epochs = config.MODEL['epochs']
+        self.data_limit = config.MODEL['data_limit']
         self.results = {
             "d_loss": [],
             "g_loss": [],
@@ -134,7 +135,7 @@ class DCGAN(object):
         except:
             tf.initialize_all_variables().run()
 
-        sample_z = np.random.uniform(-1, 1, size=(self.sample_num, self.z_dim))
+        self.sample_z = np.random.uniform(-1, 1, size=(self.sample_num, self.z_dim))
 
         increase_global_step = global_step.assign(global_step + 1)
         self.sess.run(global_step)
@@ -150,7 +151,7 @@ class DCGAN(object):
 
         # Epoch loop
         for epoch in range(self.epochs):
-            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg")) #[0:8]
+            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))[0:self.data_limit]
             batch_idxs = len(self.data) // self.batch_size
 
             epoch_d_loss = 0
@@ -200,27 +201,9 @@ class DCGAN(object):
             epoch_g_loss /= self.batch_size
 
             # Sample and evaluate inception score
-            try:
-                print("Sampling")
-                sample_op = self.sampler(self.z)
-                generated_images = self.sess.run(
-                    sample_op,
-                    feed_dict={
-                        self.z: sample_z,
-                    },
-                )
-
-                # Compute inception score
-                print("Computing inception score")
-                generated_images_list = [(image+1)*255/2 for image in generated_images]
-                score = get_inception_score(generated_images_list, self.sess, splits=4)
-                print(score)
-                
-                # Save images to png
-                save_images(generated_images, image_manifold_size(generated_images.shape[0]), './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
-
-            except Exception as e:
-                print("Sampling error:", e)
+            print("Generating images and computing inception score")
+            score = self.compute_inception_score(epoch, idx)
+            print(score)
 
             # Save results
             try:
@@ -232,6 +215,29 @@ class DCGAN(object):
                     json.dump(self.results, of, cls=NumpyEncoder)
             except Exception as e:
                 print("Result saving error:", e)
+    
+    def compute_inception_score(self, epoch, idx):
+        try:
+            # Generate images and save them
+            sample_op = self.sampler(self.z)
+            generated_images = self.sess.run(
+                sample_op,
+                feed_dict={
+                    self.z: self.sample_z,
+                },
+            ) 
+            save_images(generated_images, image_manifold_size(generated_images.shape[0]), './{}/train_{:02d}_{:04d}.png'.format(self.sample_dir, epoch, idx))
+
+
+            # Compute inception score
+            generated_images_list = [(image+1)*255/2 for image in generated_images]
+            score = get_inception_score(generated_images_list, self.sess, splits=4)
+           
+            return score
+
+        except Exception as e:
+            print("Sampling error:", e)
+            return np.nan
                 
     def sampler(self, z, y=None):
         # TODO refactor with generator
