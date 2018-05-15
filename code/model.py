@@ -21,11 +21,11 @@ class DCGAN(object):
         self.results_dir = config.DATA['results_dir']
         self.checkpoint_dir = config.MODEL['checkpoint_dir']
         self.model_dir = config.MODEL['model_dir']
-        self.batch_size = 4
+        self.batch_size = 64 # 4
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
         self.sess = sess
-        self.sample_num = 1000
+        self.sample_num = 1024 #1000
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
         self.epochs = 5
@@ -113,12 +113,10 @@ class DCGAN(object):
             s_h8, s_w8 = self.conv_out_size_same(s_h4, 2), self.conv_out_size_same(s_w4, 2)
             s_h16, s_w16 = self.conv_out_size_same(s_h8, 2), self.conv_out_size_same(s_w8, 2)
 
-            # Project z and reshape
+            # Project z, reshape and go  through 4 convolution blocks (deconv, batch norm, relu)
             self.z_ = linear(z, self.gf_dim * 8 * s_h16 * s_w16, 'g_h0_lin')
             self.h0 = tf.reshape(self.z_, [-1, s_h16, s_w16, self.gf_dim * 8])
             h0 = tf.nn.relu(self.g_bn0(self.h0))
-            
-            # Deconvolution blocks (deconv, batch norm, relu)
             h1 = tf.nn.relu(self.g_bn1(deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gf_dim * 4], name='g_h1')))
             h2 = tf.nn.relu(self.g_bn2(deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gf_dim * 2], name='g_h2')))
             h3 = tf.nn.relu(self.g_bn3(deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gf_dim * 1], name='g_h3')))
@@ -129,12 +127,17 @@ class DCGAN(object):
     def train(self):
         d_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.D_loss, var_list=self.d_vars)
         g_optim = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.G_loss, var_list=self.g_vars)
+        global_step = tf.Variable(0, name="global_step", trainable=False)
+
         try:
             tf.global_variables_initializer().run()
         except:
             tf.initialize_all_variables().run()
 
         sample_z = np.random.uniform(-1, 1, size=(self.sample_num, self.z_dim))
+
+        increase_global_step = global_step.assign(global_step + 1)
+        self.sess.run(global_step)
 
         counter = 1
         start_time = time.time()
@@ -145,51 +148,54 @@ class DCGAN(object):
         else:
             print(" [!] Load failed...")
 
+        # Epoch loop
         for epoch in range(self.epochs):
-            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))[0:8]
+            self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg")) #[0:8]
             batch_idxs = len(self.data) // self.batch_size
 
             epoch_d_loss = 0
             epoch_g_loss = 0
+
+            # Batch loop
             for idx in range(0, batch_idxs):
+                # Get batch data
                 batch_files = self.data[idx * self.batch_size:(idx + 1) * self.batch_size]
                 batch = [get_image(batch_file,
                          input_height=self.image_shape[0],
                          input_width=self.image_shape[1],
                          resize_height=self.image_shape[0],
                          resize_width=self.image_shape[1]) for batch_file in batch_files]
-
                 batch_images = np.array(batch).astype(np.float32)
-
                 batch_z = np.random.uniform(-1, 1, [self.batch_size, self.z_dim]) \
                     .astype(np.float32)
 
-                # Update D network
+                # Update networks
                 self.sess.run([d_optim], feed_dict={self.inputs: batch_images, self.z: batch_z})
+                self.sess.run([g_optim], feed_dict={self.z: batch_z}) # We used to run this line twice
 
-                self.sess.run([g_optim], feed_dict={self.z: batch_z})
-
-                # TODO Run g_optim twice to make sure that d_loss does not go to zero (different from paper)
-                self.sess.run([g_optim], feed_dict={self.z: batch_z})
-
+                # Compute loss
                 errD_fake = self.D_fake_loss.eval({self.z: batch_z})
                 errD_real = self.D_real_loss.eval({self.inputs: batch_images})
                 errG = self.G_loss.eval({self.z: batch_z})
-                
+        
+                # Save loss
                 batch_d_loss = errD_fake + errD_real
                 batch_g_loss = errG
-
                 epoch_d_loss += batch_d_loss
                 epoch_g_loss += batch_g_loss
 
+                # Print progress
                 counter += 1
-                print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f"\
-                      % (epoch, self.epochs, idx, batch_idxs,
+                current_global_step = self.sess.run(increase_global_step)
+                print("Global step: %2d\tEpoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f"\
+                      % (current_global_step, epoch, self.epochs, idx, batch_idxs,
                          time.time() - start_time, batch_d_loss, errG))
 
+                # Save model
                 if np.mod(counter, 500) == 2:
                     self.save(self.checkpoint_dir, counter)
             
+            # Compute epoch loss
             epoch_d_loss /= self.batch_size
             epoch_g_loss /= self.batch_size
 
@@ -227,7 +233,6 @@ class DCGAN(object):
             except Exception as e:
                 print("Result saving error:", e)
                 
-    
     def sampler(self, z, y=None):
         # TODO refactor with generator
         with tf.variable_scope("generator") as scope:
