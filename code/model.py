@@ -5,6 +5,7 @@ import json
 import time
 import tensorflow as tf
 import numpy as np
+import config
 from ops import lrelu, conv2d, conv_cond_concat, linear, concat, deconv2d, batch_norm
 from utils import imread, sigmoid_cross_entropy_with_logits, get_image, save_images, image_manifold_size, NumpyEncoder
 from inception_score import get_inception_score
@@ -14,12 +15,12 @@ class DCGAN(object):
         """MODEL PARAMS. INIT FROM INPUT LATER"""
         self.image_shape = 108, 108
         self.z_dim = 100
-        self.dataset_name = "photos_108"
-        self.checkpoint_dir = "checkpoints"
-        self.model_dir = 'models'
-        self.data_dir = '../dataset/' #"datadir/"  # TODO fix
-        self.sample_dir = "../dataset/generated/" # TODO fix
-        self.results_dir = 'results'
+        self.dataset_name = config.DATA['dataset_name']
+        self.data_dir = config.DATA['data_dir']
+        self.sample_dir = config.DATA['sample_dir']
+        self.results_dir = config.DATA['results_dir']
+        self.checkpoint_dir = config.MODEL['checkpoint_dir']
+        self.model_dir = config.MODEL['model_dir']
         self.batch_size = 4
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
