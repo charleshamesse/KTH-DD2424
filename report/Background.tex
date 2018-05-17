@@ -1,16 +1,48 @@
 
 \section{Background}
-Summarize a few notable approaches/papers tackling
-the same problem. The selection should cover different possible techniques
-that can be (have been) used for the same task with success.
-Also, it is good to mention other recognition/synthesis tasks that use
-the same deep learning technique as yours. (1-2 pages)
+We present the framework of GANs 
+% Summarize a few notable approaches/papers tackling the same problem. The selection should cover different possible techniques that can be (have been) used for the same task with success. Also, it is good to mention other recognition/synthesis tasks that use the same deep learning technique as yours. (1-2 pages)
 
-\subsection{Generative Adversarial Networks}
+
+\subsection{Generative Adversarial Networks} 
+% Taken as is from LSGAN paper
+The learning process of the GANs is to train a discriminator $D$ and a generator $G$ simultaneously. The target of $G$ is to learn the distribution $p_g$ over data $\bm{x}$. $G$ starts from sampling input variables $\bm{z}$ from a uniform or Gaussian distribution $p_z(\bm{z})$, then maps the input variables $\bm{z}$ to data space $G(\bm{z}; \theta_g)$ through a differentiable network. On the other hand, $D$ is a classifier $D(\bm{x}; \theta_d)$ that aims to recognize whether an image is from training data or from $G$. The minimax objective for GANs can be formulated as follows:
+
+\begin{equation}
+\label{eq_gan}
+\begin{split}
+\min_G \max_D V_{\text{\tiny GAN}}(D, G) = \mathbb{E}_{\bm{x} \sim p_{\text{data}}(\bm{x})}[\log D(\bm{x})] + \mathbb{E}_{\bm{z} \sim p_{\bm{z}}(\bm{z})}[\log (1 - D(G(\bm{z})))]&.
+\end{split}
+\end{equation}
+
 
 \subsection{Inception Score}
 
 \subsection{Spectral Normalization}
 
+
+
+\subsection{Least Squares Generative Adversarial Networks}
+% Taken as is from LSGAN paper
+
+Viewing the discriminator as a classifier, regular GANs adopt the sigmoid cross entropy loss function. As stated in Section \ref{sec:introduction}, when updating the generator, this loss function will cause the problem of vanishing gradients for the samples that are on the correct side of the decision boundary, but are still far from the real data. To remedy this problem, we propose the Least Squares Generative Adversarial Networks (LSGANs). Suppose we use the $a$-$b$ coding scheme for the discriminator, where $a$ and $b$ are the labels for fake data and real data,  respectively. Then the objective functions for LSGANs can be defined as follows:
+
+\begin{equation}
+\label{eq:lsgan}
+\begin{split}
+\min_D V_{\text{\tiny LSGAN}}(D) = &\frac{1}{2}\mathbb{E}_{\bm{x} \sim p_{\text{data}}(\bm{x})}\bigl[(D(\bm{x})-b)^2\bigr]+ \frac{1}{2}\mathbb{E}_{\bm{z} \sim p_{\bm{z}}(\bm{z})}\bigl[(D(G(\bm{z}))-a)^2\bigr] \\
+\min_G V_{\text{\tiny LSGAN}}(G) = &\frac{1}{2}\mathbb{E}_{\bm{z} \sim p_{\bm{z}}(\bm{z})}\bigl[(D(G(\bm{z}))-c)^2\bigr],
+\end{split}
+\end{equation}
+
+
+where $c$ denotes the value that $G$ wants $D$ to believe for fake data.
+
+
+
+\subsubsection{Benefits of LSGANs}
+The benefits of LSGANs can be derived from two aspects. First, unlike regular GANs, which cause almost no loss for samples that lie in a long way on the correct side of the decision boundary (Figure \ref{fig:boundary}(b)), LSGANs will penalize those samples even though they are correctly classified (Figure \ref{fig:boundary}(c)). When we update the generator, the parameters of the discriminator are fixed, i.e., the decision boundary is fixed. As a result, the penalization will make the generator to generate samples toward the decision boundary. On the other hand, the decision boundary should go across the manifold of real data for a successful GANs learning. Otherwise, the learning process will be saturated. Thus moving the generated samples toward the decision boundary leads to making them be closer to the manifold of real data. 
+
+Second, penalizing the samples lying a long way to the decision boundary can generate more gradients when updating the generator, which in turn relieves the problem of vanishing gradients. This allows LSGANs to perform more stable during the learning process. This benefit can also be derived from another perspective: as shown in Figure \ref{fig:loss}, the least squares loss function is flat only at one point, while the sigmoid cross entropy loss function will saturate when $x$ is relatively large.
 
 

@@ -1,6 +1,8 @@
 \documentclass[runningheads]{llncs}
 \usepackage{graphicx}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{mathtools}
+\usepackage{bm}
 \usepackage{hyperref}
 \usepackage{ruler}
 \usepackage[utf8]{inputenc}
@@ -29,11 +31,9 @@
 \maketitle
 
 %
-\begin{abstract}
-The abstract should summarize the contents of the paper. LNCS guidelines
-indicate it should be at least 70 and at most 150 words. It should be set in 9-point
-font size and should be inset 1.0~cm from the right and left margins. \dots
-\keywords{Generative adversarial networks, generative models, image generation}
+\begin{abstract} We experiment various Deep Convolutional Generative Adversarial Networks (DCGANs) for image generation. We start with a vanilla DCGAN and gradually add features that are expected to improve learning in terms of speed, stability and quality of generation. We evaluate our models using the inception score and discuss its relevance on cifar10 and a dataset that we collected ourselves consisting of reptile images. Finally, we discuss our findings and challenges and draw conclusions on how the features we implemented help the training of GANs.
+%he abstract should summarize the contents of the paper. LNCS guidelines indicate it should be at least 70 and at most 150 words. It should be set in 9-point font size and should be inset 1.0~cm from the right and left margins. \dots
+\keywords{Generative models, generative adversarial networks, image generation}
 \end{abstract}
 
 %
