@@ -1,14 +1,12 @@
 import tensorflow as tf
 from model import DCGAN
-
+from train import Trainer
 
 def main(_):
     with tf.Session() as sess:
         dcgan = DCGAN(sess)
-        dcgan.train()
-
-        # Below is codes for visualization
-        # visualize(sess, dcgan, FLAGS, OPTION)
+        trainer = Trainer(sess, dcgan)
+        trainer.train()
 
 
 if __name__ == '__main__':

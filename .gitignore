@@ -14,6 +14,17 @@
 code/imagenet/*
 code/__pycache__/*
 code/config.py
+dataset/cifar10_npy/*
+dataset/generated/*
+*.texpadtmp
+dataset/cifar10_npy/cifar-10-batches-py/data_batch_1
+dataset/generated/train_01_0000.png
+dataset/generated/train_00_0000.png
+dataset/generated/train_00_0001.png
+/code/checkpoints/*
+/code/checkpoints/models/*
+/code/results/output
+
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -66,3 +77,6 @@ fabric.properties
 
 # Editor-based Rest Client
 .idea/httpRequests
+code/checkpoints/models/DCGAN.model-2.meta
+code/checkpoints/models/DCGAN.model-2.data-00000-of-00001
+code/checkpoints/models/DCGAN.model-2.index

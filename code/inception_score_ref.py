@@ -11,6 +11,7 @@ DATA_DIR = '../dataset/photos_108/'
 DATASET_NAME = 'cifar10'
 
 '''
+Reptiles:
 Example output using 10 splits 30K:
 Inception score:	 1.5295098 +- 0.06244182
 Excluded  16 / 30770 pictures
@@ -22,6 +23,19 @@ Excluded  10 / 15000 pictures
 Example output using 10 splits 3K:
 Inception score:	 1.2856357 +- 0.11991055
 Excluded  2 / 3000 pictures
+
+Cifar10:
+5 splits, 1024 images
+Inception score:	 9.792953 +- 0.36040735
+
+5 splits, 512 images
+Inception score:	 8.938408 +- 0.54188323
+Excluded  0 / 513 pictures
+
+5 splits, 256 images
+Inception score:	 8.130996 +- 0.4138345
+10 splits, 256 images
+Inception score:	 6.717534 +- 0.5547067
 '''
 
 if __name__ == '__main__':
@@ -31,7 +45,7 @@ if __name__ == '__main__':
     if DATASET_NAME is 'cifar10':
         image_shape = (32,32,3)
         (x_train, _), (_, _) = cifar10.load_data()
-        limit = 1000# None # 50K images
+        limit = 1024# None # 50K images
         pictures_as_matrices = [x for x in x_train[0:limit]]
         i = len(pictures_as_matrices)
     else:
