@@ -1,13 +1,56 @@
 
 \section{Background}
-We present the framework of GANs 
+We present the framework of GANs starting with the orignal paper by Ian Goodfellow \cite{goodfellow2014generative} then describe more recent advances in a chronological order, as depicted in Figure \ref{fig:background-timeline}. 
 % Summarize a few notable approaches/papers tackling the same problem. The selection should cover different possible techniques that can be (have been) used for the same task with success. Also, it is good to mention other recognition/synthesis tasks that use the same deep learning technique as yours. (1-2 pages)
 
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw (0,0) -- (10,0);
+
+% draw vertical lines
+\foreach \x in {0,3.5,6.0,6.6,9.0,10.0}
+\draw (\x cm,3pt) -- (\x cm,-3pt);
+
+% draw nodes
+% 1 yr is roughly 2.5 units
+\draw (0,0) node[above=3pt] {GAN \cite{goodfellow2014generative}};
+\draw (0,0) node[above=14pt] {(10/06/14)};
+
+\draw (3.5,0) node[below=3pt] {DCGAN \cite{DBLP:journals/corr/RadfordMC15}};
+\draw (3.5,0) node[below=14pt] {(19/11/15)};
+
+\draw (6,0) node[above=3pt] {LSGAN \cite{mao2017least}};
+\draw (6,0) node[above=14pt] {(13/11/16)};
+
+\draw (6.6,0) node[below=3pt] {WGAN \cite{arjovsky2017wasserstein}};
+\draw (6.6,0) node[below=14pt] {(26/01/17)};
+
+\draw (9.0,0) node[above=3pt] {SN \cite{salimans2016improved}};
+\draw (9.0,0) node[above=14pt] {(16/02/18)};
+
+\draw (10.0,0) node[below=3pt] {Today};
+\draw (10.0,0) node[below=14pt] {(16/05/18)};
+
+\end{tikzpicture}
+\caption{Major contributions in the field of Generative Adversarial Networks.}
+\label{fig:background-timeline}
+\end{figure}
+
+
+% 2014 jun 10: GAN
+% 2015 nov 19: DCGAN
+% 2016 nov 13: LSGAN
+% 2017 jan 26: WGAN 
+% 2018 feb 16: SN  
+% 2018 may 16: Today 
 
 \subsection{Generative Adversarial Networks} 
-% Taken as is from LSGAN paper
-The learning process of the GANs is to train a discriminator $D$ and a generator $G$ simultaneously. The target of $G$ is to learn the distribution $p_g$ over data $\bm{x}$. $G$ starts from sampling input variables $\bm{z}$ from a uniform or Gaussian distribution $p_z(\bm{z})$, then maps the input variables $\bm{z}$ to data space $G(\bm{z}; \theta_g)$ through a differentiable network. On the other hand, $D$ is a classifier $D(\bm{x}; \theta_d)$ that aims to recognize whether an image is from training data or from $G$. The minimax objective for GANs can be formulated as follows:
+Generative Adversarial Networks (GANs) are a class of generative models trained in a adversarial manner by opposing two networks: a generative network $G$ that learns the data distribution and a discriminative network $D$ that tries and estimates the probability that a given sample came from the real training data rather than a generation from $G$. 
+ 
+The objective for $G$ is to maximize the probability of $D$ making a mistake, and the objective for $D$ is to minimize that same probability. This framework corresponds to a minimax two-player game. In the space of arbitrary functions $G$ and $D$, a unique equilibrium solution exists, with $G$ recovering the real data distribution and $D$ equal to 0.5 everywhere, that is it's unable to distinguish the fake samples from the real ones. Since $G$ and $D$ are (de-)convolutional networks, both can be trained using available backpropagation techniques.
 
+To learn the distribution $p_g$ over the real data $\bm{x}$, $G$ starts from sampling input variables $\bm{z}$ from a distribution of our choice $p_z(\bm{z})$, then maps the input variables $\bm{z}$ to space $G(\bm{z}; \theta_g)$ that should, after training, resemble the training data space. The discriminator, $D$, maps images to a boolean $D(\bm{x}; \theta_d)$ indicating whether images are from training data or generated from $G$. The orignal minimax objective for GANs is defined as:
 \begin{equation}
 \label{eq_gan}
 \begin{split}
