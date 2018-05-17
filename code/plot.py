@@ -29,7 +29,7 @@ DO_LOSSES = True
 FIGSIZE = (10,4)
 if __name__ == '__main__':  
 
-    filenames = ['vanilla_gan'] # sn_gan
+    filenames = ['sn_gan_unsure']#['vanilla_gan'] # sn_gan
 
     for filename in filenames:
         

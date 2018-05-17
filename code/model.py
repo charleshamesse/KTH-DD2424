@@ -56,6 +56,8 @@ class DCGAN(object):
         self.g_bn3 = batch_norm(name='g_bn3')  # TODO maybe remove this line
 
         self.use_spectral_norm = True
+        self.sn_update_ops_collection = 'SPECTRAL_NORM_UPDATE_OPS'
+        
         self.build_model()
 
     @staticmethod
@@ -70,8 +72,9 @@ class DCGAN(object):
 
         # Evaluate networks
         self.G = self.generator(self.z)
-        self.D_real, self.D_real_logits = self.discriminator(self.inputs, reuse=False, update_collection='NO_OPS')
-        self.D_fake, self.D_fake_logits = self.discriminator(self.G, reuse=True, update_collection=None)
+        
+        self.D_real, self.D_real_logits = self.discriminator(self.inputs, reuse=False, update_collection=self.sn_update_ops_collection)
+        self.D_fake, self.D_fake_logits = self.discriminator(self.G, reuse=True, update_collection=self.sn_update_ops_collection)
         
         # Losses
         self.D_real_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_real_logits, tf.ones_like(self.D_real)))
@@ -83,6 +86,9 @@ class DCGAN(object):
         t_vars = tf.trainable_variables()
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
+
+        # Update ops for SN
+        self.sn_update_ops = tf.get_collection(self.sn_update_ops_collection)
 
         # Saver
         self.saver = tf.train.Saver()

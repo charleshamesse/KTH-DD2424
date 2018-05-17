@@ -34,8 +34,15 @@ Excluded  0 / 513 pictures
 
 5 splits, 256 images
 Inception score:	 8.130996 +- 0.4138345
+
 10 splits, 256 images
 Inception score:	 6.717534 +- 0.5547067
+
+10 splits, 512 images
+Inception score:	 7.92 +- 0.??
+
+10 splits, 1024 images
+Inception score:	 8.947193 +- 0.4389134
 '''
 
 if __name__ == '__main__':

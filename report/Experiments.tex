@@ -38,7 +38,7 @@ Images & Splits & Inception score  \\
 \midrule
       256  & 10 & 6.72 +- 0.55 \\   
       512  & 10 & 7.92 +- 0.56\\ 
-      1024 & 10 & \\
+      1024 & 10 & 8.95 +- 0.44 \\
 \bottomrule
 \end{tabular}
 \end{subtable}%
@@ -47,9 +47,7 @@ Images & Splits & Inception score  \\
 \caption{Inception score for various number of samples of the cifar10 dataset.}
 \label{table:exp-isc}
 \end{table}%
-We choose to stick with 1024 generated images and 5 splits for all of our experiments. With this configuration, we have a target inception score of 9.79. As expected, this is below the claimed inception score of the whole cifar10 dataset, 11.24 \cite{salimans2016improved}. Thus we won't reach state of the art results in terms of inception score, but this isn't an issue since our purpose is to compare various improvements of GAN networks, which isn't affected by this choice.
-
-Other considerations on the inception score are explained in \cite{barratt2018note}.
+We choose to stick with 1024 generated images and 5 splits for all of our experiments. With this configuration, we have a target inception score of 9.79. As expected, this is below the claimed inception score of the whole cifar10 dataset, 11.24 \cite{salimans2016improved}. Thus we won't reach state of the art results in terms of inception score, but this isn't an issue since our purpose is to compare various improvements of GAN networks, which isn't affected by this choice. Other considerations on the inception score are explained in \cite{barratt2018note}.
 
 
 \subsection{DCGAN}

@@ -60,9 +60,12 @@ class Trainer(object):
                     batch_z = np.random.uniform(-1, 1, [self.model.batch_size, self.model.z_dim]) \
                         .astype(np.float32)
 
-                    # Update networks
+                    # Update networks and spectral norm
                     self.model.sess.run([d_optim], feed_dict={self.model.inputs: batch_images, self.model.z: batch_z})
                     self.model.sess.run([g_optim], feed_dict={self.model.z: batch_z}) # We used to run this line twice
+                    if self.model.use_spectral_norm:
+                        for update_op in self.model.sn_update_ops:
+                            self.model.sess.run(update_op)
 
                     # Compute loss
                     errD_fake = self.model.D_fake_loss.eval({self.model.z: batch_z})
@@ -85,7 +88,7 @@ class Trainer(object):
 
                     # Save model
                     if np.mod(counter, 500) == 2:
-                        self.model.save(self.model.checkpoint_dir, counter)
+                        self.save(self.model.checkpoint_dir, counter)
                 
                 # Compute epoch loss
                 epoch_d_loss /= self.model.batch_size
@@ -142,7 +145,7 @@ class Trainer(object):
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
 
-        self.saver.save(self.sess,
+        self.model.saver.save(self.model.sess,
                         os.path.join(checkpoint_dir, model_name),
                         global_step=step)
 
