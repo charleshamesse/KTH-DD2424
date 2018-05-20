@@ -49,33 +49,18 @@ Images & Splits & Inception score  \\
 \end{table}%
 We choose to stick with 1024 generated images and 5 splits for all of our experiments. With this configuration, we have a target inception score of 9.79. As expected, this is below the claimed inception score of the whole cifar10 dataset, 11.24 \cite{salimans2016improved}. Thus we won't reach state of the art results in terms of inception score, but this isn't an issue since our purpose is to compare various improvements of GAN networks, which isn't affected by this choice. Other considerations on the inception score are explained in \cite{barratt2018note}.
 
+\input{sections/Experiments-DCGAN}
+\input{sections/Experiments-SN-DCGAN}
+\input{sections/Experiments-W-DCGAN}
+\input{sections/Experiments-W-SN-DCGAN}
 
-\subsection{DCGAN}
-In order to establish a frame of reference a plain vanilla version of DCGAN using 
 
+\subsection{Performance Comparison}
 
-
-
-(Fig.~\ref{fig:example} shows an example).
-
-\begin{figure}
+\begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{../code/results/figures/vanilla_gan_is.png}
-\caption{Inception score over 190 epochs with Vanilla DCGAN.}
-\label{fig:example}
+\includegraphics[width=\textwidth]{../code/results/figures/all_cifar10_is.png}
+\caption{All evaluated models - Inception score, training on cifar10}
+\label{fig:exp-dcgan-is}
 \end{figure}
 
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{../code/results/figures/vanilla_gan_losses.png}
-\caption{Losses over 190 epochs with Vanilla DCGAN.}
-\label{fig:example}
-\end{figure}
-Unfortunately we can hardly interpret the losses of GANs, since the generator and discriminator are in a situation of competition where an improvement on the one leads to a deterioration on the other. Consequently, there exists a number of approaches to try and make these networks reach an equilibrium quicker. \todo{insert citations or examples if not already done in background theory}. However, this aspect of the art of training GANs goes below the scope of our work.
-
-\subsection{DCGAN with Spectral Normalization}
-
-\subsection{LSGAN}
-
-\subsection{WGAN}
