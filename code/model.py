@@ -43,7 +43,7 @@ class DCGAN(object):
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
         self.sess = sess
-        self.sample_num = 9
+        self.sample_num = config.MODEL['sample_num']
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
         self.epochs = config.MODEL['epochs']
@@ -55,7 +55,7 @@ class DCGAN(object):
         self.g_bn2 = batch_norm(name='g_bn2')
         self.g_bn3 = batch_norm(name='g_bn3')  # TODO maybe remove this line
 
-        self.use_spectral_norm = True
+        self.use_spectral_norm = config.MODEL['with_sn']
         self.sn_update_ops_collection = 'SPECTRAL_NORM_UPDATE_OPS'
         
         self.build_model()
