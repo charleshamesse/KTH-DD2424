@@ -55,9 +55,13 @@ class DCGAN(object):
         self.g_bn2 = batch_norm(name='g_bn2')
         self.g_bn3 = batch_norm(name='g_bn3')  # TODO maybe remove this line
 
+        # Spectral normalization
         self.use_spectral_norm = config.MODEL['with_sn']
         self.sn_update_ops_collection = 'SPECTRAL_NORM_UPDATE_OPS'
-        
+
+        # Wassertein loss
+        self.use_wasserstein = config.MODEL['use_wasserstein']
+
         self.build_model()
 
     @staticmethod
@@ -72,16 +76,22 @@ class DCGAN(object):
 
         # Evaluate networks
         self.G = self.generator(self.z)
-        
+
         self.D_real, self.D_real_logits = self.discriminator(self.inputs, reuse=False, update_collection=self.sn_update_ops_collection)
         self.D_fake, self.D_fake_logits = self.discriminator(self.G, reuse=True, update_collection=self.sn_update_ops_collection)
         
         # Losses
-        self.D_real_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_real_logits, tf.ones_like(self.D_real)))
-        self.D_fake_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.zeros_like(self.D_fake)))
-        self.D_loss = self.D_real_loss + self.D_fake_loss
-        self.G_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.ones_like(self.D_fake)))
-        
+        if self.use_wasserstein:
+            self.D_real_loss = - tf.reduce_mean(self.D_real_logits)
+            self.D_fake_loss = tf.reduce_mean(self.D_fake_logits)
+            self.D_loss = self.D_real_loss + self.D_fake_loss
+            self.G_loss = - tf.reduce_mean(self.D_fake_logits)
+        else:
+            self.D_real_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_real_logits, tf.ones_like(self.D_real)))
+            self.D_fake_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.zeros_like(self.D_fake)))
+            self.D_loss = self.D_real_loss + self.D_fake_loss
+            self.G_loss = tf.reduce_mean(sigmoid_cross_entropy_with_logits(self.D_fake_logits, tf.ones_like(self.D_fake)))
+            
         # Variables
         t_vars = tf.trainable_variables()
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
