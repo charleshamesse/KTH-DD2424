@@ -27,9 +27,28 @@ Example output file:
 DO_INCEPTION_SCORE = True
 DO_LOSSES = True
 FIGSIZE = (10,4)
-if __name__ == '__main__':  
 
-    filenames = ['sn_gan_unsure']#['vanilla_gan'] # sn_gan
+def concat():
+    filenames = ['sn_gan_unsure', 'sn_gan_unsure_3']
+    all_data = {
+        'd_loss': [],
+        'g_loss': [],
+        'is': []
+    }
+    for filename in filenames:
+        data = {}
+        with open('results/' + filename) as f:
+            data = json.load(f)
+        all_data['d_loss'] = all_data['d_loss'] + data['d_loss']
+        all_data['g_loss'] = all_data['g_loss'] + data['g_loss']
+        all_data['is'] = all_data['is'] + data['is']
+
+
+        with open('results/sn_gan_concat', 'w') as f:
+            json.dump(all_data, f)
+
+def plot_single():
+    filenames = ['dcgan_reptiles.json']#['vanilla_gan'] # sn_gan
 
     for filename in filenames:
         
@@ -75,3 +94,40 @@ if __name__ == '__main__':
             fig.tight_layout()
             plt.savefig('results/figures/' + filename + '_losses.png')
             # plt.show()
+    
+def plot_multiple():
+    filenames = ['sn_gan_concat', 'vanilla_gan']
+
+    
+    plt.figure(figsize=FIGSIZE)
+    plt.xlabel('Epoch')
+    plt.ylabel('Inception score')
+    plt.subplots_adjust(left=0.05, right=0.95, top=0.85, bottom=0.15)
+    for filename in filenames:
+        
+        data = {}
+        with open('results/' + filename) as f:
+            data = json.load(f)
+
+        # Inception score
+        if DO_INCEPTION_SCORE:
+            series = []
+            series_err = []
+            for score in data['is']:
+                series.append(score[0])
+                series_err.append(score[1])
+
+            x = np.arange(len(series))
+            #plt.errorbar(x, series, yerr=series_err, elinewidth=1)
+            plt.plot(x, series)#, yerr=series_err, elinewidth=1)
+    plt.legend(['SNDCGAN', 'DCGAN'])
+    plt.savefig('results/figures/multiple.png')
+            # plt.show()
+
+
+if __name__ == '__main__':  
+
+    # do_concat()
+    # plot_multiple()
+    plot_single()
+    
