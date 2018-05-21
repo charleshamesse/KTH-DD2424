@@ -21,6 +21,8 @@ MODEL = {
     'epochs': 5, # 1000
     'data_limit': 40,# None
     'sample_num': 9,
-    'with_sn': True,
-    'with_wasserstein': True,
+    'use_spectral_norm': False,
+    'use_wasserstein': True,
+    'use_weight_clipping': True,
+    'weight_clipping_limit': 0.01,
 }

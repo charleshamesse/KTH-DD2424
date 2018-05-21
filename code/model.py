@@ -12,7 +12,10 @@ from utils import imread, sigmoid_cross_entropy_with_logits, get_image
 
 class DCGAN(object):
     def __init__(self, sess):
-        """MODEL PARAMS. INIT FROM INPUT LATER"""
+        # TF Session
+        self.sess = sess
+
+        # Data
         self.data_dir = config.DATA['data_dir']
         self.dataset_name = config.DATA['dataset_name']
         self.data_limit = config.MODEL['data_limit']
@@ -23,44 +26,45 @@ class DCGAN(object):
             self.data = x_train[0:self.data_limit] / 127.5 - 1 
             self.c_dim = 3
             self.grayscale = 0
-        else:  # reptile set
+        else:  # Reptile set
             self.image_shape = 108, 108
             self.data = glob(os.path.join(self.data_dir, self.dataset_name, "*.jpg"))[0:self.data_limit]
             imread_img = imread(self.data[0])
-            if len(imread_img.shape) >= 3:  # check if image is a non-grayscale image by checking channel number
+            if len(imread_img.shape) >= 3:  # Check if image is a non-grayscale image by checking channel number
                 self.c_dim = imread(self.data[0]).shape[-1]
             else:
                 self.c_dim = 1
             self.grayscale = (self.c_dim == 1)
 
+        # Hyperparameters
+        self.model_dir = config.MODEL['model_dir']
+        self.checkpoint_dir = config.MODEL['checkpoint_dir']
+        self.epochs = config.MODEL['epochs']
         self.batch_size = config.MODEL['batch_size']
         self.batch_idxs = len(self.data) // self.batch_size
         self.sample_dir = config.DATA['sample_dir']
-        self.checkpoint_dir = config.MODEL['checkpoint_dir']
-        self.model_dir = config.MODEL['model_dir']
+        self.sample_num = config.MODEL['sample_num']
         self.z_dim = 100
-        self.batch_size = config.MODEL['batch_size']
         self.gf_dim = 64  # Dimension of gen filters in first conv layer. [64]
         self.df_dim = 64  # Dimension of discrim filters in first conv layer. [64]
-        self.sess = sess
-        self.sample_num = config.MODEL['sample_num']
         self.learning_rate = 0.0002
         self.beta1 = 0.5  # Momentum term of adam [0.5]
-        self.epochs = config.MODEL['epochs']
+
+        # Batch normalization layers
         self.d_bn1 = batch_norm(name='d_bn1')
         self.d_bn2 = batch_norm(name='d_bn2')
-        self.d_bn3 = batch_norm(name='d_bn3')  # TODO maybe remove this line
+        self.d_bn3 = batch_norm(name='d_bn3')  
         self.g_bn0 = batch_norm(name='g_bn0')
         self.g_bn1 = batch_norm(name='g_bn1')
         self.g_bn2 = batch_norm(name='g_bn2')
-        self.g_bn3 = batch_norm(name='g_bn3')  # TODO maybe remove this line
+        self.g_bn3 = batch_norm(name='g_bn3')
 
-        # Spectral normalization
-        self.use_spectral_norm = config.MODEL['with_sn']
+        # GAN variants
+        self.use_spectral_norm = config.MODEL['use_spectral_norm']
         self.sn_update_ops_collection = 'SPECTRAL_NORM_UPDATE_OPS'
-
-        # Wassertein loss
         self.use_wasserstein = config.MODEL['use_wasserstein']
+        self.use_weight_clipping = config.MODEL['use_weight_clipping']
+        self.weight_clipping_limit = config.MODEL['weight_clipping_limit']
 
         self.build_model()
 
@@ -97,8 +101,13 @@ class DCGAN(object):
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
 
-        # Update ops for SN
-        self.sn_update_ops = tf.get_collection(self.sn_update_ops_collection)
+        # Update ops for spectral normalization and gradient clipping
+        if self.use_spectral_norm:
+            self.sn_update_ops = tf.get_collection(self.sn_update_ops_collection)
+        if self.use_weight_clipping:
+            self.weight_clipping_update_ops = tf.group(
+                * [v.assign(tf.clip_by_value(v, -self.weight_clipping_limit, self.weight_clipping_limit)) for v in self.d_vars]
+            )
 
         # Saver
         self.saver = tf.train.Saver()
@@ -111,17 +120,17 @@ class DCGAN(object):
             # Convolution blocks
             # If we use spectral norm, we don't use batch norm
             if self.use_spectral_norm: 
-                h0 = lrelu(conv2d(image, self.df_dim,  name='d_h0_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
-                h1 = lrelu(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
-                h2 = lrelu(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
-                h3 = lrelu(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
-                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin', spectral_normed=self.use_spectral_norm, update_collection=update_collection)
+                h0 = lrelu(conv2d(image, self.df_dim,  name='d_h0_conv', spectral_normed=True, update_collection=update_collection))
+                h1 = lrelu(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=True, update_collection=update_collection))
+                h2 = lrelu(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=True, update_collection=update_collection))
+                h3 = lrelu(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=True, update_collection=update_collection))
+                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin', spectral_normed=True, update_collection=update_collection)
             else:
-                h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection))
-                h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection)))
-                h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection)))
-                h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=self.use_spectral_norm, update_collection=update_collection)))
-                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin', spectral_normed=self.use_spectral_norm, update_collection=update_collection)
+                h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv', spectral_normed=False))
+                h1 = lrelu(self.d_bn1(conv2d(h0, self.df_dim * 2, name='d_h1_conv', spectral_normed=False)))
+                h2 = lrelu(self.d_bn2(conv2d(h1, self.df_dim * 4, name='d_h2_conv', spectral_normed=False)))
+                h3 = lrelu(self.d_bn3(conv2d(h2, self.df_dim * 8, name='d_h3_conv', spectral_normed=False)))
+                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'd_h4_lin', spectral_normed=False)
 
             return tf.nn.sigmoid(h4), h4
 

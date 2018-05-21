@@ -19,8 +19,11 @@ class Trainer(object):
         self.results_dir = config.DATA['results_dir']
             
     def train(self):
+            
+            # Update step definition
             d_optim = tf.train.AdamOptimizer(self.model.learning_rate, beta1=self.model.beta1).minimize(self.model.D_loss, var_list=self.model.d_vars)
             g_optim = tf.train.AdamOptimizer(self.model.learning_rate, beta1=self.model.beta1).minimize(self.model.G_loss, var_list=self.model.g_vars)
+            
             global_step = tf.Variable(0, name="global_step", trainable=False)
 
             try:
@@ -60,12 +63,17 @@ class Trainer(object):
                     batch_z = np.random.uniform(-1, 1, [self.model.batch_size, self.model.z_dim]) \
                         .astype(np.float32)
 
-                    # Update networks and spectral norm
+                    # Update networks
                     self.model.sess.run([d_optim], feed_dict={self.model.inputs: batch_images, self.model.z: batch_z})
                     self.model.sess.run([g_optim], feed_dict={self.model.z: batch_z}) # We used to run this line twice
+
+                    # Update weights using spectral norm or weight clipping 
                     if self.model.use_spectral_norm:
                         for update_op in self.model.sn_update_ops:
                             self.model.sess.run(update_op)
+                    
+                    if self.model.use_weight_clipping:
+                        self.model.sess.run(self.model.weight_clipping_update_ops)
 
                     # Compute loss
                     errD_fake = self.model.D_fake_loss.eval({self.model.z: batch_z})
