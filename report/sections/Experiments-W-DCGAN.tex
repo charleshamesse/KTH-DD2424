@@ -1,19 +1,20 @@
 \subsection{W-DCGAN}
-\label{sec:exp-wdcgan}
-We present the evolution of the inception score and losses in Figures \ref{fig:exp-wdcgan-is} and \ref{fig:exp-wdcgan-losses}, respectively.
+\label{sec:exp-w-dcgan}
+We present the evolution of the inception score and losses in Figures \ref{fig:exp-w-dcgan-is} and \ref{fig:exp-w-dcgan-losses}, respectively.
    
-% is
-\begin{figure}[h]
-\centering
-%\includegraphics[width=\textwidth]{../code/results/figures/sndcgan_cifar10_is.png}
-\caption{W-DCGAN - Inception score, training on cifar10 over ~250 epochs}
-\label{fig:exp-wdcgan-is}
-\end{figure}
-
-% losses
-\begin{figure}[h]
-\centering
-%\includegraphics[width=\textwidth]{../code/results/figures/sndcgan_cifar10_losses.png}
-\caption{W-DCGAN - Losses training on cifar10 over ~250 epochs.}
-\label{fig:exp-wdcgan-losses}
+\begin{figure}[t!]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+		\includegraphics[width=\textwidth]{../code/results/figures/w-dcgan_cifar10_is.png}
+		\caption{Inception score}
+		\label{fig:exp-w-dcgan-is}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../code/results/figures/w-dcgan_cifar10_losses.png}
+		\caption{Losses}
+		\label{fig:exp-w-dcgan-losses}
+    \end{subfigure}
+    \caption{W-DCGAN - training on CIFAR10 over 250 epochs.}
 \end{figure}
