@@ -6,7 +6,7 @@ matplotlib.rcParams['mathtext.fontset'] = 'stix'
 matplotlib.rcParams['font.family'] = 'STIXGeneral'
 plt.rcParams['savefig.dpi'] = 500
 plt.style.use('ggplot')
-plt.rcParams["errorbar.capsize"] = 3
+plt.rcParams["errorbar.capsize"] = 2
 
 
 '''
@@ -26,7 +26,7 @@ Example output file:
 
 DO_INCEPTION_SCORE = True
 DO_LOSSES = True
-FIGSIZE = (10,4)
+FIGSIZE = (6,4)
 
 def concat():
     filenames = ['w-wc-dcgan_cifar10_0', 'w-wc-dcgan_cifar10_1', 'w-wc-dcgan_cifar10_2', 'w-wc-dcgan_cifar10_3']
@@ -48,7 +48,7 @@ def concat():
             json.dump(all_data, f)
 
 def plot_single():
-    filenames = ['w-dcgan_cifar10']#['vanilla_gan'] # sn_gan
+    filenames = ['w-dcgan_cifar10', 'dcgan_cifar10', 'sndcgan_cifar10', 'w-wc-dcgan_cifar10']#['vanilla_gan'] # sn_gan
 
     for filename in filenames:
         
@@ -69,9 +69,11 @@ def plot_single():
             plt.xlabel('Epoch')
             plt.ylabel('Inception score')
             plt.subplots_adjust(left=0.05, right=0.95, top=0.85, bottom=0.15)
-            plt.errorbar(x, series, yerr=series_err, elinewidth=1)
+            plt.errorbar(x, series, yerr=series_err, elinewidth=1, alpha=0.5)
+            plt.plot(x, series, color='#f8766d')
+            plt.tight_layout()
             plt.savefig('results/figures/' + filename + '_is.png')
-            # plt.show()
+            #plt.show()
 
         if DO_LOSSES:
             # Losses
@@ -93,7 +95,7 @@ def plot_single():
 
             fig.tight_layout()
             plt.savefig('results/figures/' + filename + '_losses.png')
-            # plt.show()
+            #plt.show()
     
 def plot_multiple():
     filenames = ['sn_gan_concat', 'vanilla_gan']
