@@ -119,6 +119,25 @@ Second, penalizing the samples lying a long way to the decision boundary can gen
 Recommended clip limit is 0.01
 
 \subsection{Spectral Normalization}
+Spectral normalization \cite{miyato2018spectral} was introduced in an effort to try and make the training of GANs more stable and the original paper received very positive criticism. \footnote{As a matter of fact, this has been posted on the peer-reviewing platform \url{https://openreview.net/forum?id=B1QRgziT-}:
+\begin{quote}
+\textit{``This is a great paper! I don't think this paper explains the importance of its results nearly enough and I'm concerned that it may not be obvious what a breakthrough it is just from skimming the abstract.''} - Ian Goodfellow
+\end{quote}
+}. As we noted in the previous section, Lipschitz continuity is a property of interest for GANs. More specifically, the assumption for the loss of Wasserstein GANs is that the functions yielded by the discriminator are $K$-Lipschitz for some constant $K$. Spectral normalization aims to control the Lipschitz constant of this discriminator function $f$ by constraining the spectral norm of each layer 
+$
+g_l : \bm{h}_{l-1} \mapsto W^{l} \bm{h}_{l-1}
+$. We briefly review the method, but the interested reader will find a more comprehensive explanation in the original paper. 
 
-
-
+By definition, the Lipschitz norm $\|g\|_{\rm Lip}$ is equal to $\sup_{\bm{h}} \sigma (\nabla g(\bm{h}))$, with $\sigma (A)$ being the spectral norm of the matrix $A$ (which is equivalent to the largest singular value of $A$). Therefore, for a linear layer $g_l$, the norm is given by $\|g_l\|_{\rm Lip} = \sup_{\bm{h}} \sigma (\nabla g_l(\bm{h})) = \sup_{\bm{h}} \sigma (W_l) = \sigma (W_l) $. Now, if the Lipschitz norm of the activation function $\|a_l\|_{\rm Lip}$ is equal to 1 (a condition that ReLU or Leaky ReLU satisfy \todo{cite}), we can use the composition inequality $\|g_1\circ g_2\|_{\rm Lip}\leq\|g_1\|_{\rm Lip}\cdot\|g_2\|_{\rm Lip}$ and define the bound on $\|f\|_{\rm Lip}$:
+%
+% The last layer should not have an activation function in this context
+% However we can omit (nobody will notice I guess) or add an indicator function as exponent
+%
+\begin{align}
+ 	\|f\|_{\rm Lip} \leq &  \prod_{l=1}^{L+1} \|a_{l}\|_{\rm Lip} \|g_{l}\|_{\rm Lip} = \prod_{l=1}^{L+1} \sigma (W^{l}). \label{eq:ineq_lip}
+\end{align}
+For each layer, spectral normalization alters the weight matrix $W_l$ so that it satisfies the Lipschitz constraint $\sigma (W_l) = 1$:
+\begin{align}
+\bar{W_l}_{\rm SN}(W_l) := W_l / \sigma (W_l) \label{eq:sn},
+\end{align}
+enforcing the upper bound of 1 for $\|f\|_{\rm Lip}$ using the inequation \ref{eq:ineq_lip}.
