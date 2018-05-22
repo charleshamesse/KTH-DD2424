@@ -48,7 +48,7 @@ def concat():
             json.dump(all_data, f)
 
 def plot_single():
-    filenames = ['w-dcgan_cifar10', 'dcgan_cifar10', 'sndcgan_cifar10', 'w-wc-dcgan_cifar10']#['vanilla_gan'] # sn_gan
+    filenames = ['w-sn-dcgan_cifar10']#, 'dcgan_cifar10', 'sndcgan_cifar10', 'w-wc-dcgan_cifar10']#['vanilla_gan'] # sn_gan
 
     for filename in filenames:
         
@@ -98,7 +98,7 @@ def plot_single():
             #plt.show()
     
 def plot_multiple():
-    filenames = ['sn_gan_concat', 'vanilla_gan']
+    filenames = ['dcgan_cifar10', 'sndcgan_cifar10', 'w-dcgan_cifar10', 'w-sn-dcgan_cifar10', 'w-wc-dcgan_cifar10']
 
     
     plt.figure(figsize=FIGSIZE)
@@ -122,14 +122,14 @@ def plot_multiple():
             x = np.arange(len(series))
             #plt.errorbar(x, series, yerr=series_err, elinewidth=1)
             plt.plot(x, series)#, yerr=series_err, elinewidth=1)
-    plt.legend(['SNDCGAN', 'DCGAN'])
-    plt.savefig('results/figures/multiple.png')
+    plt.legend(['DCGAN', 'SN-DCGAN', 'W-DCGAN', 'W-SN-DCGAN', 'W-WC-DCGAN'])
+    plt.savefig('results/figures/multiple_2.png')
             # plt.show()
 
 
 if __name__ == '__main__':  
 
     #concat()
-    # plot_multiple()
-    plot_single()
+    plot_multiple()
+    #plot_single()
     
