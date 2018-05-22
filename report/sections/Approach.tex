@@ -12,9 +12,9 @@ text description. (1-3 pages)
 \subsection{Data Collection}
 %not sure if this is actually something we want to include and if so where it should be introduced so feel free to change it
 %TODO possibly add a reference instead of the hyperlink
-During experimentation we mostly relied on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional data set was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon therefore this data set will be referred to as the Reptiles form here on. In total the data set is made up of approximately 30k color images all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}z
+During experimentation we mostly relied on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR-10}, however an additional data set was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon therefore this data set will be referred to as the Reptiles form here on. In total the data set is made up of approximately 20k color images all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/reptiles.png}
 \caption{Examples from the Reptiles data set}
@@ -23,19 +23,4 @@ During experimentation we mostly relied on the popular benchmark dataset \href{h
 
 
 
-
-\subsection{Frame of Reference}
-In order to measure the performance of each implementation a frame of reference had to be established. As the golden standard, that every implementation would be compared to, the inception score of the actual data sets were calculated, the resulting scores can be seen in table \ref{table:GS}
-
-\begin{table}[]
-\centering
-\caption{Inception scores for the data sets}
-\label{table:GS}
-\begin{tabular}{c|c}
-CIFAR10                   & Reptiles                    \\ \hline
-9.792953 +- 0.36040735 & 10.2415905 +- 0.92625165
-\end{tabular}
-\end{table}
-
-%Could add the score for cifar or some other data set for comparison
 
