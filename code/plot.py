@@ -29,7 +29,7 @@ DO_LOSSES = True
 FIGSIZE = (10,4)
 
 def concat():
-    filenames = ['sn_gan_unsure', 'sn_gan_unsure_3']
+    filenames = ['w-wc-dcgan_cifar10_0', 'w-wc-dcgan_cifar10_1', 'w-wc-dcgan_cifar10_2', 'w-wc-dcgan_cifar10_3']
     all_data = {
         'd_loss': [],
         'g_loss': [],
@@ -44,11 +44,11 @@ def concat():
         all_data['is'] = all_data['is'] + data['is']
 
 
-        with open('results/sn_gan_concat', 'w') as f:
+        with open('results/w-wc-dcgan_cifar10', 'w') as f:
             json.dump(all_data, f)
 
 def plot_single():
-    filenames = ['dcgan_reptiles.json']#['vanilla_gan'] # sn_gan
+    filenames = ['w-dcgan_cifar10']#['vanilla_gan'] # sn_gan
 
     for filename in filenames:
         
@@ -127,7 +127,7 @@ def plot_multiple():
 
 if __name__ == '__main__':  
 
-    # do_concat()
+    #concat()
     # plot_multiple()
     plot_single()
     
