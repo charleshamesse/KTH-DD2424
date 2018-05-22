@@ -7,7 +7,7 @@ The purpose of the project is to analyze the nature and effectiveness of differe
 
 
 \subsection{Inception Score Considerations}
-We present a challenge related to the computation and evaluation of the inception score. Most authors evaluate the inception score on 50K GAN-generated images, as recommend the authors of the original paper \cite{salimans2016improved}. By running a few preliminary experiments, we quickly realize that on top of the actual training of the network, sampling and computing the inception score are also resource-intensive tasks, and sampling 50K images is simply not possible with the time or resources available for this project.
+We present a challenge related to the computation and evaluation of the inception score. Most authors evaluate the inception score on 50K GAN-generated images, as recommended by the authors of the original paper \cite{salimans2016improved}. By running a few preliminary experiments, we quickly realize that on top of the actual training of the network, sampling and computing the inception score are also resource-intensive tasks, and sampling 50K images is simply not possible with the time or resources available for this project.
 
 Now, the number of images considered for evaluating the inception score has an impact on this score, as shows Table \ref{table:exp-isc}. This is due to the fact that the inception score not only evaluates the content of a given image but also the distribution of categories amongst the whole set of images resulting from the split. In other words, the score is sensitive to the number of images divided by the number of splits. 
 
