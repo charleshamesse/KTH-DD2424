@@ -1,17 +1,19 @@
 
-\section{Experiments} In this section, you should
+\section{Experiments}
+In this section, you should
 present the results you achieved with various experiments. The results
 can be presented in tables, plots, etc. 
 
-The purpose of the project is to analyze the nature and effectiveness of different GAN architectures as well as different improvement options. The different models  but in order to do so a frame of reference was needed 
-
+The project was composed of 8 distinct experiments where each experiment varied from the others either based on what data set was used or what network architecture was used.
 
 \subsection{Inception Score Considerations}
-We present a challenge related to the computation and evaluation of the inception score. Most authors evaluate the inception score on 50K GAN-generated images, as recommended by the authors of the original paper \cite{salimans2016improved}. By running a few preliminary experiments, we quickly realize that on top of the actual training of the network, sampling and computing the inception score are also resource-intensive tasks, and sampling 50K images is simply not possible with the time or resources available for this project.
 
-Now, the number of images considered for evaluating the inception score has an impact on this score, as shows Table \ref{table:exp-isc}. This is due to the fact that the inception score not only evaluates the content of a given image but also the distribution of categories amongst the whole set of images resulting from the split. In other words, the score is sensitive to the number of images divided by the number of splits. 
+We present a challenge related to the computation and evaluation of the inception score. Most authors evaluate the inception score on 50K GAN-generated images, as recommend by the authors of the original paper \cite{salimans2016improved}. By running a few preliminary experiments, we quickly realized that on top of the actual training of the network, sampling and computing the inception score are also resource-intensive tasks, and sampling 50K images is simply not possible with the time or resources available for this project.
 
-\begin{table}[h]
+
+Now, the number of images considered for evaluating the inception score has an impact on this score, as shows Table \ref{table:exp-isc}. This is due to the fact that the inception score not only evaluates the content of a given image but also the distribution of categories among the whole set of images resulting from the split. In other words, the score is sensitive to the number of images divided by the number of splits. 
+
+\begin{table}[H]
 \centering
 \setlength{\tabcolsep}{0.5em} % for the horizontal padding
 
@@ -48,6 +50,26 @@ Images & Splits & Inception score  \\
 \label{table:exp-isc}
 \end{table}%
 We choose to stick with 1024 generated images and 5 splits for all of our experiments. With this configuration, we have a target inception score of 9.79. As expected, this is below the claimed inception score of the whole cifar10 dataset, 11.24 \cite{salimans2016improved}. Thus we won't reach state of the art results in terms of inception score, but this isn't an issue since our purpose is to compare various improvements of GAN networks, which isn't affected by this choice. Other considerations on the inception score are explained in \cite{barratt2018note}.
+
+\subsection{Frame of Reference}
+In order to measure the performance of each implementation a frame of reference had to be established. As the golden standard, that every implementation would be compared to, the inception score of the actual data sets were calculated using the number of generated images and splits mentioned above, the resulting scores can be seen in table \ref{table:GS}
+
+\begin{table}[H]
+\centering
+\caption{Inception scores for the data sets}
+\label{table:GS}
+\begin{tabular}{c@{\hskip .5in} c}
+\toprule
+CIFAR-10                   & Reptiles   \\ 
+\midrule
+      9.792953 +- 0.36040735 & 10.2415905 +- 0.92625165 \\   
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
 
 \input{sections/Experiments-DCGAN}
 \input{sections/Experiments-SN-DCGAN}
