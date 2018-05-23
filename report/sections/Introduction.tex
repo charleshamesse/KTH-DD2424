@@ -1,12 +1,32 @@
 \section{Introduction}
-\todo{write after W-SN-DCGAN:
+
+% GANs
+Since their introduction in 2014, Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} have gained a lot of popularity in the machine learning community and more specifically in the field of generative models. The GAN framework has been applied with admirable results to many different applications such as computer vision \cite{DBLP:journals/corr/RadfordMC15} \cite{ledig2016photo} \cite{isola2017image}, speech synthesis \cite{kaneko2017generative} \cite{pascual2017segan}, or drug discovery \cite{guimaraes2017objective}. 
+
+We give a brief overview of the GAN framework. GANs consist of two major components, namely a generator and a discriminator, both consisting of a neural network. The aim of the generator is to generate samples that mimic a real data distribution from noise, and the aim of the discriminator is to distinguish samples that come from the real data distribution from the ones produced by the generator. Trained consecutively as an adversarial pair, these networks will enter a game in which the generator is encouraged to model the real data distribution as closely as possible with the discriminator acting as a critic as accurate as possible. On top of their practical abilities, this makes GANs very interesting for their inherent theoretical aspects, paving the way to leveraging methods and techniques that were formerly used in game theory exclusively.
+
+Now, the training of GANs is an infamously intricate task. In fact, a significant amount of the research on GANs has been focusing on how to improve the stability of their training. More specifically, the performance of the discriminator gets hard to control since the density ratio estimation in high-dimensional spaces is commonly inaccurate and unstable; the generator can then hardly learn the multimodal structure of the target distribution.
+
+
+% SN
+There has been numerous efforts to overcome this stability issue, amongst which expressing the network's objective functions differently, i.e. re-writing the discriminator and generator losses was shown promising. For instance, a different probability distribution divergence measure is proposed with the Wasserstein GAN (WGAN) \cite{arjovsky2017wasserstein}. Another example is the Least Squares GAN (LSGAN), where the vanishing gradient problem of the sigmoid function used in the original GAN is exposed and a solution is proposed by adopting a least squares loss function for the discriminator loss.  
+
+In a different approach, this time more architectural, spectral normalization proposes a method that reduces the function space from which can originate the discriminator to the space of Lipschitz continuous functions, assuring the boundedness of statistics \todo{cite}. This is done by normalizing the weight matrix of each layer using their spectral norm. The authors show that doing so not only improves the stability of the learning, but also that the method is easily implemented and tuned. We describe spectral normalization in more details in Section \ref{sec:bg-sn}. This recent development has received a hugely positive appraisal and is seen by many as a major breakthrough in deep learning.
+
+% Problem statement
+\todo{problem statement} In this work, we 
+
+
+% Expectations
+\todo{expectations} 
+
+
 \begin{enumerate}
 	\item GANs
 	\item SN and the huge reach it had
 	\item What we're going to do / problem statement: evaluate SN on different GANs using the IS on two datasets
 	\item Expectations
-\end{enumerate}}
-
+\end{enumerate}
 Motivate the problem you are trying to solve, attempt to make an intuitive description of the problem and also formally define the problem. (1-2 pages including title, authors and abstract)
 
 %TODO
