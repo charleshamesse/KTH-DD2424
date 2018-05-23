@@ -12,12 +12,9 @@ For our research we replicated the DCGAN network, described in great detail in \
 \subsection{Architecture}
 
 \paragraph{Generator architecture details.} The generator's architecture is depicted in Figure \ref{fig:architecture}. The input layer is a vector of size 100 followed by 4 convolutional hidden layers. The output layer is then the picture generated that feeds into the discriminator. The 4 hidden layers use the ReLU activation function while the output layer uses the $\tanh$ function. The authors of DCGAN state that using a bounded activation like $\tanh$ for the output layer allowed the network to \textit{``learn more quickly to saturate and cover the color space of the training distribution"} \cite{DBLP:journals/corr/RadfordMC15} (p. 3).
-
-\paragraph{Discriminator architecture details.} The discriminator's architecture follows a very similar structure with the obvious exception of the input and output layers. The input layer for the discriminator consists of an image, while the output layer is a single neuron activated by a $sigmoid$ function that represents the classification of real vs fake images. The convolutional layers use the leaky ReLU activation function. 
-
-\begin{figure}[h]
+\paragraph{Discriminator architecture details.} The discriminator's architecture follows a very similar structure with the obvious exception of the input and output layers. The input layer for the discriminator consists of an image, while the output layer is a single neuron activated by a $sigmoid$ function that represents the classification of real vs fake images. The convolutional layers use the leaky ReLU activation function.\begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/DCGAN.png}
+\includegraphics[width=0.7\textwidth]{figures/DCGAN.png}
 \caption{Generator Network architecture. Cited from \cite{DBLP:journals/corr/RadfordMC15} }
 \label{fig:architecture}
 \end{figure}
@@ -31,12 +28,10 @@ Due to the complexity of the networks, we run all of our experiments on two sepa
 %not sure if this is actually something we want to include and if so where it should be introduced so feel free to change it
 %TODO possibly add a reference instead of the hyperlink
 
-During experimentation we mostly rely on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional dataset was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon, this dataset will be referred to as the Reptiles dataset from here on. In total the data set is made up of approximately 20K color images, all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.
-
-
+During experimentation we mostly rely on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional dataset was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon, this dataset will be referred to as the Reptiles dataset from here on. In total the data set is made up of approximately 20K color images, all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.%
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figures/reptiles.png}
+\includegraphics[width=0.7\textwidth]{figures/reptiles.png}
 \caption{Examples from the Reptiles data set}
 \label{fig:reptiles}
 \end{figure}

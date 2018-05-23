@@ -8,15 +8,20 @@ It is however important to note that losses can hardly be interpreted when treat
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
 		\includegraphics[width=\textwidth]{../code/results/figures/dcgan_cifar10_is.png}
-		\caption{Inception score}
+		\caption{Inception score\\~}
 		\label{fig:exp-dcgan-is}
     \end{subfigure}
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../code/results/figures/dcgan_cifar10_losses.png}
-		\caption{Losses}
+		\caption{Losses\\~}
 		\label{fig:exp-dcgan-losses}
     \end{subfigure}
     \caption{DCGAN - training on CIFAR10 over 190 epochs.}
 \end{figure}
-We conduct a visual inspection of the generated images and observe that many of them look alike, if not identical. This is a common phenomenon called mode collapse, in which the generator fails to learn the complete multimodal structure of the target data distribution and rather learns a subset of modes, allowing it to trick the discriminator but not to reproduce the target data distribution.
+We conduct a visual inspection of the generated images and observe that many of them look alike, if not identical. This is a common phenomenon called mode collapse, where the generator fails to learn the complete multimodal structure of the target data distribution and rather learns a subset of modes, allowing it to trick the discriminator but not to reproduce the target distribution:
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{../code/results/figures/images/mode-collapse}
+\caption{DCGAN - example of mode collapse consequences.}
+\end{figure}

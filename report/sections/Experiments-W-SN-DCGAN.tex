@@ -9,14 +9,27 @@ The evolution of the Inception score and losses is reported in Figures \ref{fig:
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
 		\includegraphics[width=\textwidth]{../code/results/figures/w-sn-dcgan_cifar10_is.png}
-		\caption{Inception score}
+		\caption{Inception score\\~}
 		\label{fig:exp-w-sn-dcgan-is}
     \end{subfigure}
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../code/results/figures/w-sn-dcgan_cifar10_losses.png}
-		\caption{Losses}
+		\caption{Losses\\~}
 		\label{fig:exp-w-sn-dcgan-losses}
     \end{subfigure}
     \caption{W-SN-DCGAN - training on CIFAR10 over 200 epochs.}
+\end{figure}
+
+We show example generations on both of our datasets:
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{../code/results/figures/images/w-sn-dcgan_cifar10}
+\caption{W-SN-DCGAN - generated images after training on CIFAR10.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{../code/results/figures/images/w-sn-dcgan_cifar10}
+\caption{W-SN-DCGAN - generated images after training on Reptiles.}
 \end{figure}

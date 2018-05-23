@@ -96,7 +96,7 @@ where $p(y|\bm{x})$ is the conditional label distribution while $p(y)$ is the  m
 \subsection{WGAN}
 The Wasserstein GAN (WGAN) algorithm is proposed as a consequence to various  observations on how we usually measure the distance between the model distribution and the real distribution. In fact, the choice of divergence functions has a huge impact on how the discriminator will manage to classify samples as real or fake, and in turn how the generator will be led to adjust its parameters to mimic the real distribution. Authors show how the Earth Mover (EM) distance behaves in comparison to popular probability distances and divergences used in the context of learning distributions. WGANs are introduced by making GANs minimize a reasonable and efficient approximation of the EM distance, working under the assumption that the discriminator functions are $K$-Lipschitz continuous. For a parameterized family of functions $\{ f_w \}_{w \in \mathcal{W}}$ that all have the $K$-Lipschitz continuity property, the discriminator objective is defined as:
 \begin{equation} \label{eq:wgan}
-\max_{w \in \mathcal{W}} \mathbb{E}_{x \sim p(x)}[f_w(x)] -
+\max_{w \in \mathcal{W}} \mathbb{E}_{x \sim p_{\text{data}}(x)}[f_w(x)] -
 \mathbb{E}_{z \sim p(z)} [f_w(g_\theta (z)].
 \end{equation}
 As a result, one of the most compelling practical benefits of WGANs is the ability to continuously estimate the EM distance by training the discriminator to optimality. Various ways to ensure Lipschitz continuity are described, including gradient penalty or weight clipping. For the latter, however, author note that it is ``clearly terrible way to enforce a Lipschitz constraint''.
