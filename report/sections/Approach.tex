@@ -20,7 +20,7 @@ For our research we replicated the DCGAN network, described in great detail in \
 \end{figure}
 
 \subsection{Training}
-We train all networks using the Adam optimizer \cite{2014arXiv1412.6980K} with a learning rate of 0.002 and a $\beta_1$ value (exponential decay rate of first moment estimate) of 0.5, as advised by the authors of DCGAN.
+We train all networks using the Adam optimizer \cite{DBLP:journals/corr/KingmaB14} with a learning rate of 0.002 and a $\beta_1$ value (exponential decay rate of first moment estimate) of 0.5, as advised by the authors of DCGAN \cite{DBLP:journals/corr/RadfordMC15}.
 
 Due to the complexity of the networks, we run all of our experiments on two separate GPU enabled devices. We run most of our experiments on a laptop equipped with a NVIDIA GTX 1060 GPU while some training iterations were done using a Amazon Web Service EC2 Deep Learning instance with a NVIDIA K80 GPU. Even though using these machines makes our training much faster, each training iteration takes a considerable amount of time. This results in us having to run our experiments over night and use the days to implement our networks and interpret the results. 
 
@@ -28,7 +28,7 @@ Due to the complexity of the networks, we run all of our experiments on two sepa
 %not sure if this is actually something we want to include and if so where it should be introduced so feel free to change it
 %TODO possibly add a reference instead of the hyperlink
 
-During experimentation we mostly rely on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional dataset was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon, this dataset will be referred to as the Reptiles dataset from here on. In total the data set is made up of approximately 20K color images, all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.%
+During experimentation we mostly rely on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional dataset was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon, this dataset will be referred to as the Reptiles dataset from here on. In total the data set is made up of approximately 20K color images, all resized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.%
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\textwidth]{figures/reptiles.png}
