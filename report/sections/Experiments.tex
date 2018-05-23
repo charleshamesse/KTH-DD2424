@@ -3,7 +3,7 @@
 %In this section, you should
 %present the results you achieved with various experiments. The results
 %can be presented in tables, plots, etc. 
-The project was composed of 8 distinct experiments where each experiment varied from the others either based on what data set was used or what network architecture was used.
+The project consists of 8 distinct experiments where each experiment varies from the others either based on what dataset is used or what network settings are used.
 
 \subsection{Inception Score Considerations}
 
@@ -50,23 +50,6 @@ Images & Splits & Inception score  \\
 \end{table}%
 We choose to stick with 1024 generated images and 5 splits for all of our experiments. With this configuration, we have a target inception score of 9.79. As expected, this is below the claimed inception score of the whole cifar10 dataset, 11.24 \cite{salimans2016improved}. Thus we won't reach state of the art results in terms of inception score, but this isn't an issue since our purpose is to compare various improvements of GAN networks, which isn't affected by this choice. We applied the same calculations to our Reptile data set, resulting in a target inception score of $10.2415905 +- 0.92625165$. Other considerations on the inception score are explained in \cite{barratt2018note}.
 
-%\subsection{Frame of Reference}
-%In order to measure the performance of each implementation a frame of reference had to be established. As the golden standard, that every implementation would be compared to, the inception score of the actual data sets were calculated using the number of generated images and splits mentioned above, the resulting scores can be seen in table \ref{table:GS}
-%
-%\begin{table}[H]
-%\centering
-%\setlength{\tabcolsep}{0.5em} % for the horizontal padding
-%\caption{Inception scores for the data sets}
-%\label{table:GS}
-%\begin{tabular}{l  l}
-%\toprule
-%CIFAR-10                   & Reptiles   \\ 
-%\midrule
-%      9.792953 +- 0.36040735 & 10.2415905 +- 0.92625165 \\   
-%
-%\bottomrule
-%\end{tabular}
-%\end{table}
 
 
 
@@ -76,15 +59,14 @@ We choose to stick with 1024 generated images and 5 splits for all of our experi
 \input{sections/Experiments-W-WC-DCGAN}
 \input{sections/Experiments-W-SN-DCGAN}
 
-
-
-\todo{to justify the use of WGAN / the need for loss smoothness: Plotting these learning curves is not only useful for debugging and hyperparameter searches, but also correlate remarkably well with the observed sample quality. (taken from WGAN paper) }
 \subsection{Performance Comparison}
-
+We plot the Inception score evolution of all our models evaluated on CIFAR10 in Figure \ref{fig:exp-all-is}.
 \begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{../code/results/figures/all_cifar10_is.png}
 \caption{All evaluated models - Inception score, training on CIFAR10}
 \label{fig:exp-all-is}
 \end{figure}
+
+We discuss these results in the next section.
 

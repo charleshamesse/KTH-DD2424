@@ -1,9 +1,10 @@
 \subsection{W-SN-DCGAN}
 \label{sec:exp-wsndcgan}
+We replace weight clipping by spectral normalization. A first experiment with the same hyper-parameters as for all other models has shown very poor performance. By further looking into the literature, we found out that when using an optimizer such as Adam, setting $\beta_1$ (the exponential decay rate for the first moment estimate) to 0 was recommended when using the Wasserstein loss \cite{arjovsky2017wasserstein}.
 
-We present the evolution of the inception score and losses in Figures \ref{fig:exp-wsndcgan-is} and \ref{fig:exp-wsndcgan-losses}, respectively.
-   
-\begin{figure}[t!]
+The evolution of the Inception score and losses is reported in Figures \ref{fig:exp-w-sn-dcgan-is} and \ref{fig:exp-w-sn-dcgan-losses}. We observe stable Inception score and loss evolution, compared to the previous methods. We note that the generator loss is inverted compared to that of the SN-DCGAN, that is simply because of the different formulation of the loss. However, the Inception score does not seem to reach significantly higher values than with the SN-DCGAN.
+
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
