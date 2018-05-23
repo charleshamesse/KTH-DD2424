@@ -24,6 +24,7 @@ dataset/generated/train_00_0001.png
 /code/checkpoints/*
 /code/checkpoints/models/*
 /code/results/output
+/report/main.pdf
 
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
@@ -80,4 +81,3 @@ fabric.properties
 code/checkpoints/models/DCGAN.model-2.meta
 code/checkpoints/models/DCGAN.model-2.data-00000-of-00001
 code/checkpoints/models/DCGAN.model-2.index
-report/main.pdf
