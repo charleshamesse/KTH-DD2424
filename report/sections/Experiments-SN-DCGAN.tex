@@ -1,8 +1,8 @@
 \subsection{SN-DCGAN}
 \label{sec:exp-sndcgan}
-We implement the spectral normalization layer and use on the discriminator of the DCGAN used in the previous section. We present the evolution of the inception score and losses in Figures \ref{fig:exp-sndcgan-is} and \ref{fig:exp-sndcgan-losses}, respectively.
+We implement spectral normalization and use it on the discriminator of the DCGAN used in the previous section. We present the evolution of the Inception score and losses in Figures \ref{fig:exp-sndcgan-is} and \ref{fig:exp-sndcgan-losses}, respectively. We observe that both losses are much smoother with spectral normalization. This is the desired result; the original intent of the paper on spectral normalization was to provide a solution to stabilize the training of GANs \cite{miyato2018spectral}. By visual inspection of the generated images we observe a significant reduce in mode collapse and a noticeable improvement of image quality. This did however not result in a significant Inception score improvement.
    
-\begin{figure}[t!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
@@ -18,5 +18,3 @@ We implement the spectral normalization layer and use on the discriminator of th
     \end{subfigure}
     \caption{SN-DCGAN - training on CIFAR10 over 250 epochs.}
 \end{figure}
-
-We observe that both losses are much smoother with spectral normalization. This is the desired result; the original intent of the paper on spectral normalization was to provide a solution to stabilize the training of GANs \cite{miyato2018spectral}. 
