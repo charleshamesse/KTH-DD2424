@@ -15,8 +15,8 @@ We plot the Inception score evolution of all our models evaluated on CIFAR10 in 
 \todo{to justify the use of WGAN / the need for loss smoothness: Plotting these learning curves is not only useful for debugging and hyperparameter searches, but also correlate remarkably well with the observed sample quality. (taken from WGAN paper) }
 
 \subsection{Future Work}
+In the future, we would try and further explore the parameter space. The training of GANs is always a lengthy process with many influencing factors. With more time and resources, we would run parameter searches in a more systematic way and hopefully find better performing configurations. More specifically, we would start lower learning rates (ours might have been slightly too high; experiments show harsh loss evolutions) or different optimizers (WGAN literature advices to use RMSProp \cite{arjovsky2017wasserstein}).
 
+Another contribution to our work would be to implement gradient penalty and run an experiment with Wasserstein loss as well. We expect that the performance of this configuration should fall in between that of our W-WC-DCGAN (weight clipping) and W-SN-DCGAN (spectral normalization).
 
-- LSGAN
-- Gradient penalty
-- Parameter search
+Additionally, we would apply the same methodology to the LSGAN framework \cite{mao2017least} and see if spectral normalization can also help making training more stable. 
