@@ -114,7 +114,7 @@ $
 g_l : \bm{h}_{l-1} \mapsto W^{l} \bm{h}_{l-1}
 $. We briefly review the method, but the interested reader will find a more comprehensive explanation in the original paper. 
 
-By definition, the Lipschitz norm $\|g\|_{\rm Lip}$ is equal to $\sup_{\bm{h}} \sigma (\nabla g(\bm{h}))$, with $\sigma (A)$ being the spectral norm of the matrix $A$ (which is equivalent to the largest singular value of $A$). Therefore, for a linear layer $g_l$, the norm is given by $\|g_l\|_{\rm Lip} = \sup_{\bm{h}} \sigma (\nabla g_l(\bm{h})) = \sup_{\bm{h}} \sigma (W_l) = \sigma (W_l) $. Now, if the Lipschitz norm of the activation function $\|a_l\|_{\rm Lip}$ is equal to 1 (a condition that ReLU or Leaky ReLU satisfy \todo{cite}), we can use the composition inequality $\|g_1\circ g_2\|_{\rm Lip}\leq\|g_1\|_{\rm Lip}\cdot\|g_2\|_{\rm Lip}$ and define the bound on $\|f\|_{\rm Lip}$:
+By definition, the Lipschitz norm $\|g\|_{\rm Lip}$ is equal to $\sup_{\bm{h}} \sigma (\nabla g(\bm{h}))$, with $\sigma (A)$ being the spectral norm of the matrix $A$ (which is equivalent to the largest singular value of $A$). Therefore, for a linear layer $g_l$, the norm is given by $\|g_l\|_{\rm Lip} = \sup_{\bm{h}} \sigma (\nabla g_l(\bm{h})) = \sup_{\bm{h}} \sigma (W_l) = \sigma (W_l) $. Now, if the Lipschitz norm of the activation function $\|a_l\|_{\rm Lip}$ is equal to 1 (a condition that ReLU or Leaky ReLU satisfy \cite{Glorot2011DeepSR}), we can use the composition inequality $\|g_1\circ g_2\|_{\rm Lip}\leq\|g_1\|_{\rm Lip}\cdot\|g_2\|_{\rm Lip}$ and define the bound on $\|f\|_{\rm Lip}$:
 %
 % The last layer should not have an activation function in this context
 % However we can omit (nobody will notice I guess) or add an indicator function as exponent
