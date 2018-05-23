@@ -29,7 +29,7 @@ DO_LOSSES = True
 FIGSIZE = (6,4)
 
 def concat():
-    filenames = ['w-sn-dcgan_1_cifar10', 'w-sn-dcgan_3_cifar10']
+    filenames = ['w-sn-dcgan_cifar10', 'w-sn-dcgan_cifar10_1']
     all_data = {
         'd_loss': [],
         'g_loss': [],
@@ -44,11 +44,11 @@ def concat():
         all_data['is'] = all_data['is'] + data['is']
 
 
-        with open('results/w-sn-dcgan_cifar10', 'w') as f:
+        with open('results/w-sn-dcgan_cifar10_c', 'w') as f:
             json.dump(all_data, f)
 
 def plot_single():
-    filenames = ['w-sn-dcgan_reptiles']#, 'dcgan_cifar10', 'sndcgan_cifar10', 'w-wc-dcgan_cifar10']#['vanilla_gan'] # sn_gan
+    filenames = ['w-sn-dcgan_cifar10']#, 'dcgan_cifar10', 'sndcgan_cifar10', 'w-wc-dcgan_cifar10']#['vanilla_gan'] # sn_gan
 
     for filename in filenames:
         
@@ -121,15 +121,16 @@ def plot_multiple():
 
             x = np.arange(len(series))
             #plt.errorbar(x, series, yerr=series_err, elinewidth=1)
-            plt.plot(x, series)#, yerr=series_err, elinewidth=1)
+            plt.plot(x, series, alpha=0.85)#, yerr=series_err, elinewidth=1)
     plt.legend(['DCGAN', 'SN-DCGAN', 'W-DCGAN', 'W-SN-DCGAN', 'W-WC-DCGAN'])
-    plt.savefig('results/figures/multiple_2.png')
+    plt.tight_layout()
+    plt.savefig('results/figures/all_cifar10_is.png')
             # plt.show()
 
 
 if __name__ == '__main__':  
 
     #concat()
-    #plot_multiple()
-    plot_single()
+    plot_multiple()
+    #plot_single()
     
