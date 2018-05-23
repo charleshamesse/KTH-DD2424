@@ -10,7 +10,7 @@
 For our research we replicated the DCGAN network, described in great detail in \cite{DBLP:journals/corr/RadfordMC15}, in Tensorflow using Taehoon Kim's (found \href{https://github.com/carpedm20/DCGAN-tensorflow}{here}) implementation as inspiration. \\
 \subsection{Network Architecture}
 \paragraph{Generator architecture details.} The generator's input layer is a vector of size 100 followed by 4 convolutional hidden layers. The output layer is then the picture generated that feeds into the discriminator. The 4 hidden layers use the ReLU activation function(Eq.(\ref{relu-equation})) while the output layer uses the $\tanh$ function(Eq.(\ref{tanh-equation})). The authors of DCGAN state that using a bounded activation like $\tanh$ for the output layer allowed the network to \textit{"learn more quickly to saturate and cover the color space of the training distribution"}(p. 3).
-\paragraph{Discriminator architecture details}. The discriminator's architecture is basicly follows a very similar structure. .
+\paragraph{Discriminator architecture details}. The discriminator's architecture  follows a very similar structure with the . 
 
 %Within the
 %discriminator we found the leaky rectified activation (Maas et al., 2013) (Xu et al., 2015) to work
@@ -40,7 +40,7 @@ Due to the complexity of the networks we did all of our experiments on two separ
 %not sure if this is actually something we want to include and if so where it should be introduced so feel free to change it
 %TODO possibly add a reference instead of the hyperlink
 
-During experimentation we mostly relied on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional data set was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon therefore this data set will be referred to as the Reptiles form here on. In total the data set is made up of approximately 20K color images all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.
+During experimentation we mostly relied on the popular benchmark dataset \href{https://www.cs.toronto.edu/~kriz/cifar.html}{CIFAR10}, however an additional data set was collected using \href{https://www.flickr.com/services/api/}{Flickr's API}. Due to varying amounts of quality pictures of objects that would be interesting to base the image generation on, a collection that included mostly different reptiles with a fair amount of arachnid's thrown into the mix was ultimately settled upon, this data set will be referred to as the Reptiles data set from here on. In total the data set is made up of approximately 20K color images all re-sized to dimensions of 108x108x3 before training was conducted. Examples of images can be seen in figure \ref{fig:reptiles}.
 
 
 \begin{figure}[H]
