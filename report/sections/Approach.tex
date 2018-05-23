@@ -7,10 +7,11 @@
 %The computational complexity of your model. And similar questions.
 %To help explain your approach please make figures to accompany your
 %text description. (1-3 pages)
-For our research we replicated the DCGAN network, described in great detail in \cite{DBLP:journals/corr/RadfordMC15}, in Tensorflow using Taehoon Kim's (found \href{https://github.com/carpedm20/DCGAN-tensorflow}{here}) implementation as inspiration. \\
+For our research we replicated the DCGAN network, described in great detail in \cite{DBLP:journals/corr/RadfordMC15}, in Tensorflow using Taehoon Kim's (found \href{https://github.com/carpedm20/DCGAN-tensorflow}{here}) implementation as inspiration.
 \subsection{Network Architecture}
 \paragraph{Generator architecture details.} The generator's input layer is a vector of size 100 followed by 4 convolutional hidden layers. The output layer is then the picture generated that feeds into the discriminator. The 4 hidden layers use the ReLU activation function(Eq.(\ref{relu-equation})) while the output layer uses the $\tanh$ function(Eq.(\ref{tanh-equation})). The authors of DCGAN state that using a bounded activation like $\tanh$ for the output layer allowed the network to \textit{"learn more quickly to saturate and cover the color space of the training distribution"}(p. 3).
-\paragraph{Discriminator architecture details}. The discriminator's architecture  follows a very similar structure with the . 
+\paragraph{Discriminator architecture details}. The discriminator's architecture  follows a very similar structure with the obvious exception of the input and output layers. The input layer for the discriminator consists of an image, while the output layer is a single neuron activated by a $sigmoid$ function that represents the classification of real vs fake images. The convolutional layers use the leaky relu function (Eq.(\ref{lrelu-equation})). \\
+Both networks were trained using the Adam optimizer \cite{2014arXiv1412.6980K} with a learning rate of 0.002, as advised by the authors of DCGAN.
 
 %Within the
 %discriminator we found the leaky rectified activation (Maas et al., 2013) (Xu et al., 2015) to work
@@ -25,6 +26,16 @@ x = max(0, x)\\
 \label{tanh-equation}
 \tanh x = \frac{1 - e^{-2x}}{1 + e^{-2x}}
 \end{equation}
+
+\begin{equation}
+\label{lrelu-equation}
+       lrelu = 
+        \begin{cases}
+            x & \text{if $x > 0$} \\
+            0.01x & \text{otherwise}
+        \end{cases}
+\end{equation}
+
 
 \begin{figure}[h]
 \centering
