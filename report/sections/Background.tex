@@ -75,30 +75,32 @@ We describe the method briefly. By applying the Inception model \cite{inceptionv
 \begin{equation}
 \label{eq_IS}
 \begin{split}
-IS(G) = exp\big(\mathbb{E}_{\bm{x} \sim p_{\text{data}}(\bm{x})}D_{KL}(p(y|\bm{x})||p(y))\big).
+\text{IS}(G) = \exp \big(\mathbb{E}_{\bm{x} \sim p_{\text{data}}(\bm{x})}D_\text{KL}(p(y|\bm{x})||p(y))\big).
 \end{split}
 \end{equation}
 
-Here $D_{KL}$ is known as the Kullback Libler divergence and it measures how one probability distribution diverges from another by using a logarithmic difference:
+Here $D_{KL}$ is known as the Kullback-Leibler divergence and it measures how one probability distribution diverges from another by using a logarithmic difference:
 \begin{eqnarray}
-	D_{\mathrm {KL} }(P\|Q)=\int _{-\infty }^{\infty }p(x)\,\log {\frac {p(x)}{q(x)}}\,dx
+	D_{\mathrm {KL} }(P\|Q)=\int _{-\infty }^{\infty }p(x)\,\log {\frac {p(x)}{q(x)}}\,dx,
 \end{eqnarray}
- $p(y|\bm{x})$ is the conditional label distribution while $p(y)$ is the  marginalized label distribution, i.e. $p(y)=\int_{\bm{x}} (p(y|\bm{x})p_g(\bm{x}) d\bm{x}$. In order to calculate the score we replace $p(y)$ with the empirical marginal class distribution $\hat{p}(y) = \sum^N_{i=1} p(y|\bm{x}^i)$ and estimate the expectation using the basic Monte Carlo estimator yielding:
+where $p(y|\bm{x})$ is the conditional label distribution while $p(y)$ is the  marginalized label distribution, i.e. $p(y)=\int_{\bm{x}} (p(y|\bm{x})p_g(\bm{x}) d\bm{x}$. In order to calculate the score we replace $p(y)$ with the empirical marginal class distribution $\hat{p}(y) = \sum^N_{i=1} p(y|\bm{x}^i)$ and estimate the expectation using the basic Monte Carlo estimator yielding:
 
 \begin{equation}
 \label{eq_IS2}
 \begin{split}
-IS(G) = exp\big(\sum^N_{i=1}D_{KL}(p(y|\bm{x}^i)||\hat{p}(y))\big).
+\text{IS}(G) = \exp\left(\sum^N_{i=1}D_{\mathrm{KL}}(p(y|\bm{x}^i)||\hat{p}(y))\right).
 \end{split}
 \end{equation}
 
 
 \subsection{WGAN}
-\todo{write}
-
-\todo{cite authors of WGAN saying ``Weight clipping is a clearly terrible way to enforce a Lipschitz constraint''}
-
-Recommended clip limit is 0.01
+The Wasserstein GAN (WGAN) algorithm is proposed as a consequence to various  observations on how we usually measure the distance between the model distribution and the real distribution. In fact, the choice of divergence functions has a huge impact on how the discriminator will manage to classify samples as real or fake, and in turn how the generator will be led to adjust its parameters to mimic the real distribution. Authors show how the Earth Mover (EM) distance behaves in comparison to popular probability distances and divergences used in the context of learning distributions. WGANs are introduced by making GANs minimize a reasonable and efficient approximation of the EM distance, working under the assumption that the discriminator functions are $K$-Lipschitz continuous. For a parameterized family of functions $\{ f_w \}_{w \in \mathcal{W}}$ that all have the $K$-Lipschitz continuity property, the discriminator objective is defined as:
+\begin{equation} \label{eq:wgan}
+\max_{w \in \mathcal{W}} \mathbb{E}_{x \sim p(x)}[f_w(x)] -
+\mathbb{E}_{z \sim p(z)} [f_w(g_\theta (z)].
+\end{equation}
+As a result, one of the most compelling practical benefits of WGANs is the ability to continuously estimate the EM distance by training the discriminator to optimality. Various ways to ensure Lipschitz continuity are described, including gradient penalty or weight clipping. For the latter, however, author note that it is ``clearly terrible way to enforce a Lipschitz constraint''.
+% Recommended clip limit is 0.01
 
 \subsection{Spectral Normalization}
 \label{sec:bg-sn}
@@ -107,7 +109,7 @@ Spectral normalization \cite{miyato2018spectral} was introduced in an effort to 
 \begin{quote}
 \textit{``This is a great paper! I don't think this paper explains the importance of its results nearly enough and I'm concerned that it may not be obvious what a breakthrough it is just from skimming the abstract.''} - Ian Goodfellow
 \end{quote}
-}. As we noted in the previous section, Lipschitz continuity is a property of interest for GANs. More specifically, the assumption for the loss of Wasserstein GANs is that the functions yielded by the discriminator are $K$-Lipschitz for some constant $K$. Spectral normalization aims to control the Lipschitz constant of this discriminator function $f$ by constraining the spectral norm of each layer 
+}. As we noted in the previous section, Lipschitz continuity is a property of interest for GANs. More specifically, the assumption for the loss of Wasserstein GANs is that the functions yielded by the discriminator are $K$-Lipschitz continuous for some constant $K$. Spectral normalization aims to control the Lipschitz constant of this discriminator function $f$ by constraining the spectral norm of each layer 
 $
 g_l : \bm{h}_{l-1} \mapsto W^{l} \bm{h}_{l-1}
 $. We briefly review the method, but the interested reader will find a more comprehensive explanation in the original paper. 
