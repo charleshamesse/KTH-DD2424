@@ -11,45 +11,9 @@ Now, the training of GANs is an infamously intricate task. In fact, a significan
 % SN
 There has been numerous efforts to overcome this stability issue, amongst which expressing the network's objective functions differently, i.e. re-writing the discriminator and generator losses was shown promising. For instance, a different probability distribution divergence measure is proposed with the Wasserstein GAN (WGAN) \cite{arjovsky2017wasserstein}. Another example is the Least Squares GAN (LSGAN), where the vanishing gradient problem of the sigmoid function used in the original GAN is exposed and a solution is proposed by adopting a least squares loss function for the discriminator loss.  
 
-In a different approach, this time more architectural, spectral normalization proposes a method that reduces the function space from which can originate the discriminator to the space of Lipschitz continuous functions, assuring the boundedness of statistics \todo{cite}. This is done by normalizing the weight matrix of each layer using their spectral norm. The authors show that doing so not only improves the stability of the learning, but also that the method is easily implemented and tuned. We describe spectral normalization in more details in Section \ref{sec:bg-sn}. This recent development has received a hugely positive appraisal and is seen by many as a major breakthrough in deep learning.
+In a different approach, more architectural this time, spectral normalization proposes a method that reduces the function space from which can originate the discriminator to the space of Lipschitz continuous functions, assuring the boundedness of statistics \todo{cite}. This is done by normalizing the weight matrix of each layer using their spectral norm. The authors show that doing so not only improves the stability of the learning, but also that the method is easily implemented and tuned. We describe spectral normalization in more details in Section \ref{sec:bg-sn}. This recent development has received a hugely positive appraisal and is seen by many as a major breakthrough in deep learning.
 
 % Problem statement
-\todo{problem statement} In this work, we 
-
+In this work, we implement a number of different GANs for image generation and add spectral normalization \cite{miyato2018spectral} to evaluate its effect on all of our configurations. For instance, we try WGAN \cite{arjovsky2017wasserstein}, which works under the assumption that the discriminator function is Lipschitz continuous; a property assured by spectral normalization. In this regard, it makes sense to run experiments on WGAN with spectral normalization or different ways of ensuring the discriminator's Lipschitz continuity. In order to evaluate and compare the performance of our GANs, we use the Inception score \cite{salimans2016improved}. We also discuss the relevance of this metric. As for the datasets, we use CIFAR10 \cite{cifar100} and another dataset that we gathered ourselves for this study consisting of 20K animal pictures (mostly reptiles), fetched from the Flickr API. In the following, we will denote it the ``Reptiles'' dataset. The purpose is to evaluate these techniques on arbitrary data and not the usual computer vision datasets. 
 
 % Expectations
-\todo{expectations} 
-
-
-\begin{enumerate}
-	\item GANs
-	\item SN and the huge reach it had
-	\item What we're going to do / problem statement: evaluate SN on different GANs using the IS on two datasets
-	\item Expectations
-\end{enumerate}
-Motivate the problem you are trying to solve, attempt to make an intuitive description of the problem and also formally define the problem. (1-2 pages including title, authors and abstract)
-
-%TODO
-%Motivate the problem
-
-%In this project, we will implement a number of different Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} for image generation.
- 
-%We plan to at least implement DCGAN \cite{DBLP:journals/corr/RadfordMC15} with the new Spectral Normalization \cite{miyato2018spectral}. On top of that and if time allows, we will also implement different losses such as LSGAN \cite{mao2017least} or WGAN \cite{arjovsky2017wasserstein}, and various training improvement techniques such as mini-batch discrimination \cite{salimans2016improved}. 
-
-%For evaluating the performance of these GANs, we will implement the inception score metric as described in \cite{salimans2016improved}. We already have made up a dataset of 30K animal pictures (mostly reptiles), fetched from the Flickr API. If that turns out to be too few or not suitable for any reason we will fall back to using CIFAR-100 or ImageNet (or a subset of these).
-
-The purpose of this project is to investigate the performance of the different types of Generative Adversarial Networks (GANs) \cite{goodfellow2014generative} for image generation as well as possible improvement options.
-The project was originally defined based on varying levels of priority where everything assigned priority 1 was promised to be completed.
-
-\begin{itemize}
-	\item Implement Deep Convolutional Generative Adversial Network with original loss \cite{DBLP:journals/corr/RadfordMC15} (priority 1)
-	\item Implement the inception score metric \cite{salimans2016improved} (priority 1)
-	\item Implement Spectral Normalization (priority 1)
-	\item Evaluate all our GANs on our reptile dataset (priority 1)
-	\item Implement other losses (LSGAN, WGAN) \cite{mao2017least} (priority 2)
-	\item Evaluate GANs on CIFAR-100 (priority 2)
-	\item Implement mini-batch discrimination and or other improvements \cite{salimans2016improved}. (priority 3)
-\end{itemize}
-
-In order to evaluate the performance of these GANs, the evaluation metric known as the inception score, as described in \cite{salimans2016improved}, will be implemented. Furthermore a data set consisting of roughly 30K animal pictures (mostly reptiles), was fetched from the Flickr API while other well known options such as a subset of CIFAR-100 or ImageNet were thought of as possible replacements in the case of unsatisfactory results.
-

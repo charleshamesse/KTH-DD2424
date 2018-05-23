@@ -80,3 +80,4 @@ fabric.properties
 code/checkpoints/models/DCGAN.model-2.meta
 code/checkpoints/models/DCGAN.model-2.data-00000-of-00001
 code/checkpoints/models/DCGAN.model-2.index
+report/main.pdf
