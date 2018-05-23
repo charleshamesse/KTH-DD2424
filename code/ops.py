@@ -80,6 +80,7 @@ def spectral_normed_weight(W, u=None, num_iters=1, update_collection=None, with_
     else:
         return W_bar
 
+
 def conv_cond_concat(x, y):
     """Concatenate conditioning vector on feature map axis."""
     x_shapes = x.get_shape()
@@ -124,18 +125,6 @@ def deconv2d(input_, output_shape,
         else:
             deconv = tf.nn.conv2d_transpose(input_, w, output_shape=output_shape,
                                             strides=[1, d_h, d_w, 1], padding=padding)
-        '''
-        Without spectral norm:
-        try:
-            deconv = tf.nn.conv2d_transpose(input_, w, output_shape=output_shape,
-                                            strides=[1, d_h, d_w, 1])
-
-        # Support for verisons of TensorFlow before 0.7.0
-        
-        except AttributeError:
-            deconv = tf.nn.deconv2d(input_, w, output_shape=output_shape,
-                                    strides=[1, d_h, d_w, 1])
-        '''
 
         biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
         deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
@@ -146,8 +135,10 @@ def deconv2d(input_, output_shape,
 def lrelu(x, leak=0.2, name="lrelu"):
     return tf.maximum(x, leak * x)
 
+
 def scope_has_variables(scope):
     return len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)) > 0
+
 
 def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, spectral_normed=False, update_collection=None):
     shape = input_.get_shape().as_list()
@@ -164,10 +155,5 @@ def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, spectra
             mul = tf.matmul(input_, spectral_normed_weight(weight, update_collection=update_collection))
         else:
             mul = tf.matmul(input_, weight)
-        '''
-        if with_w:
-            return tf.matmul(input_, matrix) + bias, matrix, bias
-        else:
-            return tf.matmul(input_, matrix) + bias
-        '''
+
         return mul + bias

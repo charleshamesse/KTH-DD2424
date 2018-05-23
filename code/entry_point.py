@@ -8,6 +8,5 @@ def main(_):
         trainer = Trainer(sess, dcgan)
         trainer.train()
 
-
 if __name__ == '__main__':
     tf.app.run()
